@@ -1,57 +1,67 @@
 {
-    "experiment_1_performance": {
-        "pemcan": {
-            "auroc": 0.934,
-            "auprc": 0.892,
-            "f1": 0.886,
-            "acc": 91.2
+    "dataset": "Calibrated AI-READI T2D Protocol (N=2,840)",
+    "primary_task": "Diabetic Autonomic Neuropathy (DAN)",
+    "benchmarks": {
+        "clinical_tabular_baseline": {
+            "auroc": 0.7123607757613521,
+            "auroc_95ci": [
+                0.6678506074870688,
+                0.7564988037369326
+            ],
+            "auprc": 0.6263452583640885,
+            "f1": 0.5201072386058981,
+            "acc": 68.54130052724078,
+            "ece": 0.04526524944967461,
+            "brier": 0.2071448713541031,
+            "sens_at_90_spec": 0.34234234234234234
         },
-        "early_concat": {
-            "auroc": 0.862,
-            "auprc": 0.801,
-            "f1": 0.793,
-            "acc": 83.4
+        "early_concatenation": {
+            "auroc": 0.6686268400965808,
+            "auroc_95ci": [
+                0.619693040948014,
+                0.7104936594202899
+            ],
+            "auprc": 0.5165248272740652,
+            "f1": 0.3715170278637771,
+            "acc": 64.32337434094903,
+            "ece": 0.12458721947690934,
+            "brier": 0.23486995697021484,
+            "sens_at_90_spec": 0.24324324324324326
         },
-        "dense_cross_attention": {
-            "auroc": 0.912,
-            "auprc": 0.865,
-            "f1": 0.858,
-            "acc": 88.6
+        "pemcan_proposed": {
+            "auroc": 0.6123140431497781,
+            "auroc_95ci": [
+                0.5640683800320404,
+                0.6585812757565394
+            ],
+            "auprc": 0.5320847501838752,
+            "f1": 0.4793028322440087,
+            "acc": 57.99648506151143,
+            "ece": 0.12952136927937372,
+            "brier": 0.24169085919857025,
+            "sens_at_90_spec": 0.20270270270270271
         }
     },
-    "experiment_2_efficiency": {
-        "total_params_M": 148.6,
-        "trainable_params_M": 2.6,
+    "parameter_accounting": {
+        "total_backbone_M": 148.6,
+        "trainable_adapter_M": 2.6,
         "ratio_percent": 1.75,
-        "latency_ms": 20.2,
-        "jetson_throughput_records_per_sec": 14
+        "latency_ms": 19.01956799905747,
+        "inference_vram_gb": 1.18,
+        "training_vram_gb": 8.4
     },
-    "experiment_3_missingness": {
-        "levels": [0.0, 0.1, 0.3, 0.5],
-        "pemcan_auroc": [0.934, 0.918, 0.892, 0.861],
-        "early_auroc": [0.862, 0.784, 0.715, 0.642]
+    "federated_communication": {
+        "full_model_fp32_MB": 594.4,
+        "pemcan_fp32_MB": 10.4,
+        "pemcan_fp16_MB": 5.2,
+        "pemcan_int8_MB": 2.6,
+        "reduction_fp32_percent": 98.25,
+        "reduction_int8_percent": 99.56
     },
-    "experiment_4_rank_ablation": {
-        "ranks": [2, 4, 8, 16],
-        "aurocs": [0.890, 0.918, 0.934, 0.925],
-        "trainable_params_M": [0.65, 1.30, 2.60, 5.20]
-    },
-    "experiment_9_scalability": {
-        "horizons_days": [3, 7, 14, 21, 30],
-        "pemcan_vram_gb": [5.1, 6.4, 8.5, 10.7, 13.5],
-        "dense_vram_gb": [20.4, 28.1, 37.8, 55.2, 88.6]
-    },
-    "experiment_10_multitask": {
-        "DAN (Neuropathy)": {"single": 0.934, "multitask": 0.941},
-        "DR (Retinopathy)": {"single": 0.916, "multitask": 0.924},
-        "CKD (Renal)": {"single": 0.882, "multitask": 0.895},
-        "AGV (Glycemic)": {"single": 0.925, "multitask": 0.932}
-    },
-    "experiment_11_federated": {
-        "nodes": 50,
-        "non_iid_alpha": 0.3,
-        "convergence_rounds": {"fedavg_full_ft": 86, "fedavg_lora": 54, "fedavg_pemcan": 38},
-        "bandwidth_mb_per_round": {"fedavg_full_ft": 594.4, "fedavg_lora": 12.8, "fedavg_pemcan": 2.6},
-        "test_auroc": {"fedavg_full_ft": 0.898, "fedavg_lora": 0.911, "fedavg_pemcan": 0.932}
+    "multitask_aurocs": {
+        "DAN (Neuropathy)": 0.6123140431497781,
+        "DR Grade >= 2 (Retinopathy)": 0.6992302405498283,
+        "CKD Stage >= 3 (Renal)": 0.6409273653176092,
+        "DPN (Peripheral)": 0.6312394699122388
     }
 }

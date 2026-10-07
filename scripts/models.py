@@ -1,6 +1,7 @@
 """
 PEM-CAN: Parameter-Efficient Multimodal Cross-Attention Network
-PyTorch implementation of architectures, low-rank subspace adapters, and baselines.
+PyTorch implementation of architectures, Stiefel-manifold low-rank adapters,
+and clinical/PEFT baselines.
 """
 
 import math
@@ -12,7 +13,7 @@ class SubspaceLoRALinear(nn.Module):
     """
     Subspace-Constrained Low-Rank Adaptation (LoRA) Layer
     W = W_0 + (alpha / r) * (B @ A)
-    with Grassmannian Orthogonal Regularization.
+    constrained by Stiefel-manifold Orthogonal Regularization: || A @ A^T - I_r ||_F^2.
     """
     def __init__(self, in_features: int, out_features: int, rank: int = 8, alpha: float = 16.0):
         super().__init__()
@@ -21,7 +22,7 @@ class SubspaceLoRALinear(nn.Module):
         self.rank = rank
         self.scaling = alpha / rank
 
-        # Frozen base weight
+        # Frozen foundation base weight
         self.weight = nn.Parameter(torch.empty(out_features, in_features), requires_grad=False)
         nn.init.kaiming_uniform_(self.weight, a=math.sqrt(5))
 
@@ -33,7 +34,7 @@ class SubspaceLoRALinear(nn.Module):
         self.bias = nn.Parameter(torch.zeros(out_features))
 
     def orthogonal_loss(self) -> torch.Tensor:
-        """Computes Grassmannian orthogonality loss: || A @ A^T - I ||_F^2"""
+        """Computes Stiefel-manifold orthogonality loss: || A @ A^T - I_r ||_F^2"""
         aat = torch.matmul(self.lora_A, self.lora_A.t())
         identity = torch.eye(self.rank, device=self.lora_A.device)
         return torch.norm(aat - identity, p='fro') ** 2
@@ -42,6 +43,43 @@ class SubspaceLoRALinear(nn.Module):
         base_out = F.linear(x, self.weight, self.bias)
         lora_out = (x @ self.lora_A.t()) @ self.lora_B.t() * self.scaling
         return base_out + lora_out
+
+
+class StandardLoRALinear(nn.Module):
+    """Unregularized Standard LoRA baseline (Hu et al., 2022)."""
+    def __init__(self, in_features: int, out_features: int, rank: int = 8, alpha: float = 16.0):
+        super().__init__()
+        self.in_features = in_features
+        self.out_features = out_features
+        self.rank = rank
+        self.scaling = alpha / rank
+
+        self.weight = nn.Parameter(torch.empty(out_features, in_features), requires_grad=False)
+        nn.init.kaiming_uniform_(self.weight, a=math.sqrt(5))
+
+        self.lora_A = nn.Parameter(torch.empty(rank, in_features))
+        self.lora_B = nn.Parameter(torch.zeros(out_features, rank))
+        nn.init.kaiming_uniform_(self.lora_A, a=math.sqrt(5))
+        self.bias = nn.Parameter(torch.zeros(out_features))
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        base_out = F.linear(x, self.weight, self.bias)
+        lora_out = (x @ self.lora_A.t()) @ self.lora_B.t() * self.scaling
+        return base_out + lora_out
+
+
+class BottleneckAdapter(nn.Module):
+    """Houlsby / Pfeiffer Bottleneck Adapter baseline."""
+    def __init__(self, embed_dim: int, bottleneck_dim: int = 64):
+        super().__init__()
+        self.down = nn.Linear(embed_dim, bottleneck_dim)
+        self.act = nn.GELU()
+        self.up = nn.Linear(bottleneck_dim, embed_dim)
+        nn.init.zeros_(self.up.weight)
+        nn.init.zeros_(self.up.bias)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return x + self.up(self.act(self.down(x)))
 
 
 class TemporalConvEncoder(nn.Module):
@@ -55,22 +93,19 @@ class TemporalConvEncoder(nn.Module):
         self.gelu = nn.GELU()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        # x: [Batch, InChannels, Time]
         h = self.gelu(self.bn1(self.conv1(x)))
         h = self.gelu(self.bn2(self.conv2(h)))
-        # [Batch, EmbedDim, Time'] -> [Batch, Time', EmbedDim]
         return h.transpose(1, 2)
 
 
 class ParameterEfficientCrossAttention(nn.Module):
-    """Bidirectional Cross-Attention with Subspace LoRA Projections."""
+    """Bidirectional Cross-Attention with Low-Rank Subspace Projections."""
     def __init__(self, embed_dim: int = 768, num_heads: int = 8, rank: int = 8):
         super().__init__()
         self.embed_dim = embed_dim
         self.num_heads = num_heads
         self.head_dim = embed_dim // num_heads
 
-        # Low-rank adapted Q, K, V projections
         self.q_proj = SubspaceLoRALinear(embed_dim, embed_dim, rank=rank)
         self.k_proj = SubspaceLoRALinear(embed_dim, embed_dim, rank=rank)
         self.v_proj = SubspaceLoRALinear(embed_dim, embed_dim, rank=rank)
@@ -86,7 +121,7 @@ class ParameterEfficientCrossAttention(nn.Module):
 
         scores = torch.matmul(q, k.transpose(-2, -1)) / math.sqrt(self.head_dim)
         attn_weights = F.softmax(scores, dim=-1)
-        out = torch.matmul(attn_weights, v) # [B, heads, N_q, head_dim]
+        out = torch.matmul(attn_weights, v)
         out = out.transpose(1, 2).contiguous().view(B, N_q, D)
         return self.out_proj(out)
 
@@ -95,7 +130,10 @@ class ParameterEfficientCrossAttention(nn.Module):
 
 
 class PEMCAN(nn.Module):
-    """Complete Parameter-Efficient Multimodal Cross-Attention Network."""
+    """
+    Complete Parameter-Efficient Multimodal Cross-Attention Network.
+    Tasks: [DAN, DR Grade >= 2, CKD Stage >= 3, DPN]
+    """
     def __init__(self, embed_dim: int = 768, rank: int = 8, num_tasks: int = 4):
         super().__init__()
         self.embed_dim = embed_dim
@@ -103,14 +141,14 @@ class PEMCAN(nn.Module):
         self.act_encoder = TemporalConvEncoder(in_channels=3, embed_dim=embed_dim)
         self.temporal_fusion = nn.Linear(embed_dim * 2, embed_dim)
 
-        # Frozen visual projection simulation
+        # Frozen visual projection adapter
         self.visual_adapter = SubspaceLoRALinear(embed_dim, embed_dim, rank=rank)
 
         # Bidirectional cross-modal attention
         self.cross_attn_v2s = ParameterEfficientCrossAttention(embed_dim, rank=rank)
         self.cross_attn_s2v = ParameterEfficientCrossAttention(embed_dim, rank=rank)
 
-        # Multi-task classification heads
+        # Multi-task classification head
         self.classifier = nn.Sequential(
             nn.Linear(embed_dim * 2, 256),
             nn.GELU(),
@@ -119,21 +157,16 @@ class PEMCAN(nn.Module):
         )
 
     def forward(self, x_v: torch.Tensor, x_g: torch.Tensor, x_a: torch.Tensor):
-        # x_v: [Batch, Patches, EmbedDim]
-        # x_g: [Batch, 1, Time_CGM]
-        # x_a: [Batch, 3, Time_Act]
         z_v = self.visual_adapter(x_v)
 
         h_g = self.cgm_encoder(x_g)
         h_a = self.act_encoder(x_a)
 
-        # Align temporal token lengths via interpolation if needed
         if h_g.size(1) != h_a.size(1):
             h_a = F.interpolate(h_a.transpose(1, 2), size=h_g.size(1), mode='linear', align_corners=False).transpose(1, 2)
 
         z_s = self.temporal_fusion(torch.cat([h_g, h_a], dim=-1))
 
-        # Bidirectional cross-modal alignment
         s_v2s = self.cross_attn_v2s(z_v, z_s)
         s_s2v = self.cross_attn_s2v(z_s, z_v)
 
@@ -153,6 +186,24 @@ class PEMCAN(nn.Module):
         return orth_loss * 1e-3 + align_loss * 1e-2
 
 
+class ClinicalTabularBaseline(nn.Module):
+    """Clinical Feature Baseline on Tabular Biomarkers (Age, Sex, HbA1c, BP, CGM metrics, HRV)."""
+    def __init__(self, in_features: int = 10, num_tasks: int = 4):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(in_features, 64),
+            nn.BatchNorm1d(64),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(64, 32),
+            nn.ReLU(),
+            nn.Linear(32, num_tasks)
+        )
+
+    def forward(self, tabular: torch.Tensor):
+        return self.net(tabular)
+
+
 class EarlyConcatenationBaseline(nn.Module):
     def __init__(self, embed_dim: int = 768, num_tasks: int = 4):
         super().__init__()
@@ -168,11 +219,8 @@ class EarlyConcatenationBaseline(nn.Module):
         )
 
     def forward(self, x_v: torch.Tensor, x_g: torch.Tensor, x_a: torch.Tensor):
-        # x_v: [B, Patches, Dim] -> [B, Dim]
         v = x_v.mean(dim=1)
-        # x_g: [B, 1, T] -> [B, Dim]
         g = self.cgm_pool(x_g).squeeze(1)
-        # x_a: [B, 3, T] -> mean across channels -> [B, Dim]
         a = self.act_pool(x_a.mean(dim=1, keepdim=True)).squeeze(1)
         x = torch.cat([v, g, a], dim=-1)
         return self.mlp(x)
@@ -193,3 +241,14 @@ class GatedMultimodalUnit(nn.Module):
         z = torch.sigmoid(self.gate(torch.cat([v, s], dim=-1)))
         h = z * v_act + (1 - z) * s_act
         return self.head(h)
+
+
+def parameter_breakdown(model: nn.Module):
+    """Prints fine-grained parameter breakdown across components."""
+    total = sum(p.numel() for p in model.parameters())
+    trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    return {
+        'total_parameters': total,
+        'trainable_parameters': trainable,
+        'trainable_ratio_percent': (trainable / total) * 100.0 if total > 0 else 0.0
+    }

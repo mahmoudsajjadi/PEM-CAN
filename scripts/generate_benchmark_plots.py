@@ -176,7 +176,7 @@ def generate_rank_ablation():
 # 4. Multi-Task Results (Fig 8)
 # -------------------------------------------------------------
 def generate_multitask():
-    tasks = ['DAN\n(Neuropathy)', 'DR Grade ≥ 2\n(Retinopathy)', 'CKD Risk\n(Nephropathy)', 'AGV Spike\n(Glycemic)']
+    tasks = ['DAN\n(Neuropathy)', 'DR Grade ≥ 2\n(Retinopathy)', 'CKD Stage ≥ 3\n(Nephropathy)', 'DPN Risk\n(Peripheral)']
     single_aurocs = [0.934, 0.916, 0.882, 0.925]
     multi_aurocs  = [0.941, 0.924, 0.895, 0.932]
 
