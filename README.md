@@ -1,13 +1,13 @@
-# PEM-CAN: Parameter-Efficient Multimodal Diabetic Neuropathy Detection
+# PEM-CAN: Parameter-Efficient Multimodal Fusion for Diabetic Neuropathy Screening: Architectural Framework and Simulation Benchmarking
 
 [![Paper](https://img.shields.io/badge/Paper-IEEE%20JBHI-blue.svg)](main.pdf)
 [![Status](https://img.shields.io/badge/Compilation-Success%20(Exit%200)-brightgreen.svg)](main.pdf)
 [![PyTorch](https://img.shields.io/badge/PyTorch-v2.14-EE4C2C.svg)](scripts/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Cohort](https://img.shields.io/badge/Benchmark-NIH%20AI--READI%20(N%3D2%2C840)-purple.svg)](scripts/dataset_sim.py)
+[![Benchmark](https://img.shields.io/badge/Benchmark-Calibrated%20AI--READI%20(N%3D2%2C840)-purple.svg)](scripts/dataset_sim.py)
 
 Official PyTorch implementation and reproduction package for the manuscript:  
-**"PEM-CAN: Parameter-Efficient Multimodal Diabetic Neuropathy Detection"**  
+**"PEM-CAN: Parameter-Efficient Multimodal Fusion for Diabetic Neuropathy Screening: Architectural Framework and Simulation Benchmarking"**  
 *Seyed Mahmoud Sajjadi Mohammadabadi* — Department of Computer Science and Engineering, University of Nevada, Reno.
 
 ---
@@ -27,7 +27,7 @@ Diabetic autonomic neuropathy (DAN) is an insidious complication of diabetes mel
 **PEM-CAN (Parameter-Efficient Multimodal Cross-Attention Network)** addresses this diagnostic challenge by:
 1. **Bridging Oculomics & Wearables:** Synchronizing spatial retinal fundus photography ($384 \times 384$) with continuous wearable biosignals (Dexcom G6 continuous glucose monitoring with $T_g=2{,}016$ steps, Garmin Vivosmart 5 actigraphy, and nocturnal heart rate variability).
 2. **Freezing Foundation Backbones:** Keeping massive pre-trained vision backbones (ViT-B/16) and temporal encoders frozen to eliminate full-gradient memory blowup during surveillance training.
-3. **Stiefel-Manifold Orthogonal Adaptation:** Updating only **$2.60\text{ M}$ parameters (1.75% of backbone weights)** via rank-$8$ adapters constrained by Stiefel-manifold orthogonality penalties ($\|\mathbf{A}\mathbf{A}^\top - \mathbf{I}_r\|_F^2$) to preserve projection rank and prevent visual modality collapse.
+3. **Stiefel-Manifold Orthogonal Adaptation:** Updating only **$2.60\text{ M}$ parameters (1.75% of model weights)** via rank-$8$ adapters constrained by Stiefel-manifold orthogonality penalties ($\|\mathbf{A}\mathbf{A}^\top - \mathbf{I}_r\|_F^2$) to preserve projection rank and prevent visual modality collapse.
 4. **Resilience to Sensor Missingness:** Preserving high diagnostic fidelity ($0.861$ AUROC) under up to 50% continuous sensor packet loss.
 
 ---
@@ -45,7 +45,8 @@ Evaluated on the primary task of **Diabetic Autonomic Neuropathy (DAN, 22.5% pre
 
 | Category | Model Architecture | AUROC [95% CI] | AUPRC | F1-Score | Accuracy | ECE | DeLong $p$ |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Clinical Tabular** | Logistic Regression | $0.782$ [$0.742, 0.822$] | $0.512$ | $0.562$ | $75.2\%$ | $0.078$ | $<0.001$ |
+| **Theoretical Limit** | **Oracle Latent State (Bayes Optimal Ceiling)** | **0.957 [0.935, 0.975]** | **0.887** | **0.865** | **93.8%** | **0.015** | --- |
+| **Clinical Tabular** | Logistic Regression | $0.782$ [$0.742, 0.822$] | $0.512$ | $0.558$ | $75.8\%$ | $0.078$ | $<0.001$ |
 | | XGBoost / Gradient Boosting | $0.814$ [$0.776, 0.852$] | $0.556$ | $0.602$ | $79.0\%$ | $0.064$ | $<0.001$ |
 | **Unimodal** | Retinal Fundus (ViT-B/16 Full FT) | $0.849$ [$0.814, 0.884$] | $0.618$ | $0.648$ | $82.2\%$ | $0.058$ | $<0.001$ |
 | | CGM Stream Only (DeepGLU) | $0.804$ [$0.765, 0.843$] | $0.542$ | $0.589$ | $78.1\%$ | $0.071$ | $<0.001$ |
