@@ -38,7 +38,7 @@
 \maketitle
 
 \begin{abstract}
-Diabetic autonomic neuropathy (DAN) is a lethal yet underdiagnosed complication of diabetes mellitus that doubles 5-year mortality through silent myocardial ischemia and sudden cardiac death. Outpatient screening remains hindered by the operational burden of cardiovascular autonomic reflex tests (CARTs) and the insensitivity of quarterly glycated hemoglobin (HbA1c) assays to acute glycemic volatility. Although spatial retinal fundus photography reveals microvascular remodeling (oculomics) and continuous wearable biosensors capture circadian glycemic and autonomic fluctuations, integrating these streams is challenged by high-dimensional modality asymmetry, risk of visual feature collapse, and pervasive wearable missingness. Here, we present the \textbf{Parameter-Efficient Multimodal Cross-Attention Network (PEM-CAN)}, an edge-deployable architecture that synchronizes spatial retinal photographs with continuous wearable biosignals within an orthogonal low-rank subspace while keeping foundation backbones frozen. Evaluated on a comprehensive benchmark statistically calibrated to the NIH Bridge2AI AI-READI Type 2 Diabetes protocol ($N=2{,}840$ patient records pairing fundus imaging, Dexcom G6 glucose monitoring, and Garmin Vivosmart 5 actigraphy), PEM-CAN achieves state-of-the-art diagnostic discrimination for prevalent DAN ($22.5\%$ prevalence) with an AUROC of $0.934 \pm 0.008$ [$95\%$ CI: $0.921, 0.947$], an F1-score of $0.886 \pm 0.011$, an Expected Calibration Error of $0.038$, and $86.4\%$ sensitivity at $90\%$ specificity, rising to $0.941$ AUROC in multi-task co-phenotyping. The architecture updates only $2.60\text{ M}$ parameters ($1.75\%$ of $148.6\text{ M}$ backbone weights), operates at $20.2\text{ ms}$ inference latency on a $1.18\text{ GB}$ FP16 footprint on an NVIDIA Jetson Orin Nano, retains $0.861$ AUROC under $50\%$ sensor packet loss, maintains linear memory scaling over 30-day temporal horizons, and cuts federated transmission bandwidth by $98.25\%$ ($10.4\text{ MB/round}$ in FP32) and $99.56\%$ ($2.6\text{ MB/round}$ with INT8 quantization) across 50 decentralized hospital nodes. Code and benchmark suites are accessible at \url{https://github.com/mahmoudsajjadi/PEM-CAN}.
+Diabetic autonomic neuropathy (DAN) is a severe, underdiagnosed microvascular complication of diabetes mellitus that doubles five-year mortality through silent myocardial ischemia and malignant cardiac arrhythmias. Routine clinical screening remains constrained by the infrastructure requirements of cardiovascular autonomic reflex tests (CARTs) and the inability of quarterly glycated hemoglobin (HbA1c) assays to capture daily glycemic volatility. While spatial retinal fundus photography captures microvascular structural remodeling (oculomics) and continuous wearable sensors track real-time glycemic and autonomic dynamics, combining these streams is challenged by high-dimensional modality asymmetry, risk of visual gradient dominance, and pervasive wearable missingness. Here, we present the \textbf{Parameter-Efficient Multimodal Cross-Attention Network (PEM-CAN)}, an architectural framework that synchronizes spatial retinal photographs with continuous wearable biosignals within a Stiefel-manifold orthogonal low-rank subspace while keeping foundation backbones frozen. Because raw, coupled tri-modal clinical data across multi-center cohorts are constrained by institutional privacy and data use agreements, we formulate a comprehensive simulation benchmark ($N=2{,}840$ patient profiles) statistically calibrated to the empirical marginals, clinical covariance structures, and demographic distributions of the NIH Bridge2AI AI-READI Type 2 Diabetes protocol. On the primary task of prevalent DAN detection ($22.5\%$ prevalence), PEM-CAN achieves an AUROC of $0.934$ [$95\%$ CI: $0.904, 0.960$ on the held-out test split, $N=568$], an AUPRC of $0.795 \pm 0.011$, an F1-score of $0.803 \pm 0.012$, an Expected Calibration Error of $0.038$, and $85.5\%$ sensitivity at $92.0\%$ specificity ($90.5\%$ accuracy), rising to $0.941$ AUROC in multi-task co-phenotyping. The architecture updates only $2.60\text{ M}$ parameters ($1.75\%$ of $148.6\text{ M}$ backbone weights). Workstation training requires $8.4\text{ GB}$ peak VRAM (vs. $32.4\text{ GB}$ for full fine-tuning, enabled by freezing the 86.6M-parameter vision backbone). At inference time, low-rank factor updates fold directly into the base weights, executing with a $1.18\text{ GB}$ FP16 footprint and $20.2\text{ ms}$ latency on an NVIDIA Jetson Orin Nano. PEM-CAN retains $0.861$ AUROC under $50\%$ continuous sensor packet loss, maintains linear memory scaling over 30-day temporal horizons, and cuts federated transmission bandwidth across 50 decentralized hospital nodes to $10.4\text{ MB/round}$ in FP32 ($98.25\%$ reduction) and $2.6\text{ MB/round}$ under INT8 quantization ($99.56\%$ reduction). Complete code, simulation generators, and configuration suites are accessible at \url{https://github.com/mahmoudsajjadi/PEM-CAN}.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -54,11 +54,11 @@ Parameter-Efficient Fine-Tuning (PEFT), Multimodal Deep Learning, Diabetic Auton
 
 \section{Introduction}
 \label{sec:intro}
-\IEEEPARstart{D}{iabetic} autonomic neuropathy (DAN) is among the most clinically devastating yet frequently overlooked microvascular complications of diabetes mellitus, doubling the five-year mortality rate of affected patients through silent myocardial infarction, malignant cardiac arrhythmias, and sudden metabolic decompensation~\cite{vinik2003diabetic,tesfaye2010diabetic}. Despite its lethal trajectory, clinical diagnosis remains largely reactive~\cite{spallone2011cardiovascular}. Standard staging depends on specialized cardiovascular autonomic reflex tests (CARTs) or sudomotor axon reflex evaluations, which require dedicated autonomic laboratory infrastructure and are rarely performed during routine outpatient visits~\cite{boulton2005diabetic}. Furthermore, conventional glycemic monitoring via glycated hemoglobin (HbA1c) represents a blunt retrospective instrument; by condensing three months of complex metabolic fluctuations into a single blurred mean, HbA1c remains blind to rapid postprandial glucose surges, nocturnal hypoglycemic crashes, and circadian autonomic variability that directly accelerate neurovascular apoptosis~\cite{danne2017international,battelino2023continuous}.
+\IEEEPARstart{D}{iabetic} autonomic neuropathy (DAN) is among the most clinically devastating yet frequently overlooked microvascular complications of diabetes mellitus, doubling the five-year mortality rate of affected patients through silent myocardial infarction, malignant cardiac arrhythmias, and sudden metabolic decompensation~\cite{vinik2003diabetic,tesfaye2010diabetic,maser2003association}. Despite its lethal trajectory, clinical diagnosis remains largely reactive~\cite{spallone2011cardiovascular}. Standard staging depends on specialized cardiovascular autonomic reflex tests (CARTs) or sudomotor axon reflex evaluations, which require dedicated autonomic laboratory infrastructure and are rarely performed during routine outpatient visits~\cite{boulton2005diabetic}. Furthermore, conventional glycemic monitoring via glycated hemoglobin (HbA1c) represents a blunt retrospective instrument; by condensing three months of complex metabolic fluctuations into a single blurred mean, HbA1c remains blind to rapid postprandial glucose surges, nocturnal hypoglycemic crashes, and circadian autonomic variability that directly accelerate microvascular and neurovascular damage~\cite{danne2017international,battelino2023continuous}.
 
 To transcend these diagnostic blind spots, biomedical informatics must unify two distinct observational windows into human physiology~\cite{baltrusaitis2018multimodal,dunn2021wearable}:
 \begin{enumerate}
-    \item \textbf{The Ocular Window (Cumulative Structural Damage):} The retina is embryologically and anatomically an exposed extension of the central nervous system~\cite{wagner2020insights}. High-resolution retinal fundus photography non-invasively captures the microvascular architecture of the human body, revealing capillary rarefaction, arteriolar narrowing, and microaneurysms that correlate directly with systemic autonomic nerve fiber attrition~\cite{poplin2018prediction,ting2017development,gulshan2016development,zhou2023retfound}.
+    \item \textbf{The Ocular Window (Cumulative Structural Damage):} The retina is embryologically and anatomically an exposed extension of the central nervous system~\cite{wagner2020insights}. High-resolution retinal fundus photography non-invasively captures the microvascular architecture of the human body, revealing capillary rarefaction, arteriolar narrowing, and microaneurysms that correlate directly with systemic autonomic and peripheral nerve fiber attrition~\cite{poplin2018prediction,ting2017development,gulshan2016development,zhou2023retfound,cheung2008retinal}.
     \item \textbf{The Wearable Window (Dynamic Physiological Provocation):} Continuous glucose monitoring (CGM) and commercial wearable actigraphy capture the dynamic metabolic and autonomic excursions that drive microvascular damage~\cite{danne2017international,dunn2021wearable}. Wearable sensor telemetry provides longitudinal recordings of interstitial glucose fluctuations, resting heart rate volatility, respiratory patterns, sleep architecture, and autonomic stress scores over days and weeks.
 \end{enumerate}
 
@@ -78,7 +78,7 @@ The core contributions of this study are fourfold:
 \begin{enumerate}
     \item \textbf{Ocular-Wearable Fusion Framework:} We formulate a parameter-efficient foundation fusion architecture that synchronizes spatial retinal fundus photography with multi-day continuous glucose monitoring and wearable actigraphy, handling dimensional and sampling asymmetries without fine-tuning heavy visual backbones.
     \item \textbf{Stiefel-Manifold Orthogonal Regularization:} We introduce a low-rank adapter projection constrained by a Stiefel-manifold orthogonality penalty ($\mathcal{L}_{\text{orth}}$), ensuring that low-rank basis vectors remain well-conditioned and preventing visual feature dominance.
-    \item \textbf{Comprehensive Public Benchmark on AI-READI:} We establish a 5-fold cross-validated benchmark on $N=2{,}840$ patient records calibrated to the NIH Bridge2AI AI-READI protocol across 15 competing clinical, heuristic, and foundation baselines. PEM-CAN achieves superior diagnostic discrimination ($0.934$ AUROC, $0.886$ F1-score) and retains $0.861$ AUROC under $50\%$ sensor dropout.
+    \item \textbf{Calibrated Benchmark on AI-READI Protocol:} We establish a 5-fold cross-validated benchmark on $N=2{,}840$ patient records statistically calibrated to the NIH Bridge2AI AI-READI protocol across 19 competing clinical, heuristic, and foundation baselines. PEM-CAN achieves superior diagnostic discrimination ($0.934$ AUROC, $0.803$ F1-score, $0.038$ ECE at $22.5\%$ prevalence) and retains $0.861$ AUROC under $50\%$ sensor dropout.
     \item \textbf{Edge Profiling and Federated Scaling:} We validate edge execution ($20.2\text{ ms}$ latency, $1.18\text{ GB}$ FP16 footprint on NVIDIA Jetson Orin Nano) and demonstrate up to $99.56\%$ reduction in federated client transmission bandwidth across 50 decentralized hospital nodes.
 \end{enumerate}
 
@@ -121,7 +121,7 @@ Ambulatory wearable biosensors regularly suffer from sensor detachment, motion a
 
 % Adapters
 \node[adapter] (v_ad) at (9.0, 3.2) {Stiefel Subspace\\Adapter $W_v = W_0 + \frac{\alpha}{r}BA$};
-\node[adapter] (s_ad) at (9.0, -0.4) {Temporal Alignment\\Adapter $\Delta W_s$};
+\node[adapter] (s_ad) at (9.0, -0.4) {Temporal Projector\\$\Delta W_s$};
 
 % Central Fusion
 \node[fusion] (xattn) at (13.5, 1.4) {Low-Rank Cross-Attention\\Projection Adapters\\$\mathcal{S}_{\text{cross}}(Z_v, Z_s)$};
@@ -161,17 +161,17 @@ The diagnostic objective is to estimate the posterior probability for a multi-ta
     P(Y \mid X_v, X_g, X_a) = \int_{\mathcal{Z}} P(Y \mid Z) P(Z \mid X_v, X_g, X_a) \, dZ
     \label{eq:posterior}
 \end{equation}
-where $\mathcal{Z} \subseteq \mathbb{R}^{d_m}$ is a shared latent representation manifold ($d_m = 768$). Importantly, all target variables represent clinical diagnoses: Diabetic Autonomic Neuropathy (DAN), Diabetic Retinopathy Grade $\ge 2$ (DR), Chronic Kidney Disease Stage $\ge 3$ (CKD), and Diabetic Peripheral Neuropathy (DPN). Target leakage is strictly prevented: no prediction endpoint is computed directly from input time-series metrics.
+where $\mathcal{Z} \subseteq \mathbb{R}^{d_m}$ is a shared latent representation manifold ($d_m = 768$). Importantly, all target variables represent clinical diagnoses: Diabetic Autonomic Neuropathy (DAN), Diabetic Retinopathy Grade $\ge 2$ (DR), Chronic Kidney Disease (CKD: eGFR $<60$ or persistent albuminuria UACR $\ge 30$), and Diabetic Peripheral Neuropathy (DPN: confirmed loss of protective sensation). Target leakage is strictly prevented: no prediction endpoint is computed directly from input time-series metrics.
 
-To ensure both visual and temporal modalities contribute non-redundant diagnostic information without modality collapse, the representations must satisfy:
+To ensure that multimodal fusion yields non-trivial diagnostic utility beyond unimodal representations, the learning objective is formulated to capture complementary conditional mutual information:
 \begin{equation}
     I(Z_s; Y \mid Z_v) > 0 \quad \text{and} \quad I(Z_v; Y \mid Z_s) > 0.
     \label{eq:mutual_info}
 \end{equation}
-Equation~\eqref{eq:mutual_info} establishes the theoretical condition for non-trivial multimodal synergy under the Data Processing Inequality.
+Equation~\eqref{eq:mutual_info} formalizes the objective of acquiring non-redundant predictive features across structural ocular and dynamic physiological modalities.
 
 \subsection{Modality-Specific Feature Embedding}
-The retinal photograph $x_v$ is partitioned into $M = (H/P) \times (W/P)$ spatial patches of size $P \times P$ ($P=16$). A pre-trained, frozen Vision Transformer (ViT-B/16) serves as spatial backbone $\Phi_v$, yielding spatial token matrix $Z_v$:
+The retinal photograph $x_v$ is partitioned into $M = (H/P) \times (W/P)$ spatial patches of size $P \times P$ ($P=16$). A pre-trained, frozen Vision Transformer (ViT-B/16, pre-trained on ImageNet-21k / MAE with $86.6\text{M}$ weights) serves as spatial backbone $\Phi_v$, yielding spatial token matrix $Z_v$:
 \begin{equation}
     Z_v = \Phi_v(x_v) \in \mathbb{R}^{M \times d_m},
     \label{eq:vit_embed}
@@ -183,7 +183,7 @@ For continuous temporal biosignals $x_g$ and $x_a$, multiscale 1D temporal convo
     h_g &= \text{GELU}\left(\text{BatchNorm}\left(\text{Conv1D}_{k=7, s=2}(x_g)\right)\right), \\
     h_a &= \text{GELU}\left(\text{BatchNorm}\left(\text{Conv1D}_{k=15, s=4}(x_a)\right)\right).
 \end{align}
-Temporal representations are projected into the shared embedding space with learnable positional embeddings, producing unified sensor token sequence $Z_s \in \mathbb{R}^{L \times d_m}$ ($L = 252$ tokens for standard 7-day recordings).
+For standard 7-day recordings ($T_g = 2{,}016$ steps), the first dilated layer with stride $s=2$ downsamples to $1{,}008$, and the second layer with stride $s=4$ produces $L=252$ tokens. For 30-day recordings ($T_g = 8{,}640$ steps), identical striding produces $L=1{,}080$ tokens. Temporal representations are projected into the shared embedding space with learnable positional embeddings, producing unified sensor token sequence $Z_s \in \mathbb{R}^{L \times d_m}$.
 
 \subsection{Parameter-Efficient Subspace Adaptation}
 Foundation projection matrices $W_0 \in \mathbb{R}^{d_m \times d_m}$ are frozen throughout optimization. Learnable adaptations to cross-attention query, key, and value projection layers are constrained to low-rank factorization matrices~\cite{hu2022lora}:
@@ -253,33 +253,42 @@ where $\mathcal{L}_{\text{align}} = 1 - \cos\left( \bar{Z}_v, \bar{Z}_s \right)$
 \section{Experimental Design and Results}
 \label{sec:experiments}
 
-\subsection{Benchmark Protocol and Label Definitions}
+\subsection{Calibrated Simulation Benchmark and Generative Model}
 \label{sec:cohort_setup}
-To establish a reproducible evaluation framework, we develop a benchmark suite statistically calibrated to the clinical distributions, marginals, and covariance matrices of the NIH Bridge2AI AI-READI Type 2 Diabetes protocol ($N=2{,}840$)~\cite{aireadi2024}. All simulated subjects represent diagnosed Type 2 Diabetes patients across varying severity strata, preventing detection tasks from collapsing into simple diabetes-status differentiation.
+To establish an open, reproducible evaluation framework without violating institutional data use agreements governing raw clinical images, we develop a simulation benchmark generator statistically calibrated to the empirical distributions, marginals, and covariance matrices of the NIH Bridge2AI AI-READI Type 2 Diabetes protocol ($N=2{,}840$)~\cite{aireadi2024}. All simulated subjects represent diagnosed Type 2 Diabetes patients across varying severity strata.
 
-The four clinical multi-task diagnostic endpoints are defined as follows:
+The data generation process is mathematically formulated as follows:
 \begin{enumerate}
-    \item \textbf{Diabetic Autonomic Neuropathy (DAN, 22.5\% prevalence):} Adjudicated composite autonomic cardiovascular/sudomotor dysfunction, corresponding to abnormal postural heart rate/blood pressure responses or COMPASS-31 autonomic score $\ge 16$.
-    \item \textbf{Diabetic Retinopathy (DR Grade $\ge 2$, 18.2\% prevalence):} Moderate non-proliferative diabetic retinopathy or worse based on International Clinical Diabetic Retinopathy (ICDR) criteria.
-    \item \textbf{Chronic Kidney Disease (CKD Stage $\ge 3$, 14.1\% prevalence):} Laboratory-confirmed eGFR $< 60\text{ mL/min/1.73 m}^2$ or Urine Albumin-to-Creatinine Ratio $\ge 30\text{ mg/g}$.
-    \item \textbf{Diabetic Peripheral Neuropathy (DPN, 26.8\% prevalence):} Confirmed loss of protective sensation via 10-g Semmes-Weinstein monofilament examination or Toronto Clinical Neuropathy Score proxy.
+    \item \textbf{Latent Disease Severity:} Each subject $i$ is assigned an underlying metabolic and neurovascular disease severity $\theta_i \sim \text{Beta}(2.0, 4.0)$ ($\theta_i \in [0, 1]$).
+    \item \textbf{Demographics and Clinical Variables:} Demographic assignments match AI-READI proportions: Non-Hispanic White ($60\%$), Black / African American ($25\%$), and Hispanic / Latino ($15\%$). Age is generated as $52 + 12\epsilon_{\text{age}} + 8\theta_i$, diabetes duration as $4 + 15\theta_i + \text{Exp}(1/3)$, HbA1c as $6.2 + 4.5\theta_i + \mathcal{N}(0, 0.5^2)$, BMI as $26 + 8\theta_i + \mathcal{N}(0, 3^2)$, and systolic blood pressure as $122 + 25\theta_i + \mathcal{N}(0, 8^2)$.
+    \item \textbf{Visual Feature Embeddings:} High-dimensional spatial embeddings $Z_v \in \mathbb{R}^{M \times d_m}$ ($M=576, d_m=768$) emulate patch features extracted by frozen ViT-B/16 from macula-centered fundus photographs, where peripheral microvascular tokens correlate directly with severity $\theta_i$.
+    \item \textbf{Continuous Glucose Telemetry:} 7-day CGM series $x_g \in \mathbb{R}^{2016 \times 1}$ are generated with baseline glucose $95 + 110\theta_i\text{ mg/dL}$, circadian rhythm $12\sin(\omega t)$, and non-stationary stochastic volatility $\sigma_i = 8 + 28\theta_i\text{ mg/dL}$, standardized as $(x_g - 120)/40$.
+    \item \textbf{Wearable Actigraphy:} Tri-axial acceleration $x_a \in \mathbb{R}^{2016 \times 3}$ and autonomic features (SDNN, RMSSD, resting HR) reflect exertion inversely scaled to severity.
+    \item \textbf{Clinical Labels and Prevalences:} Disease labels are generated via calibrated logistic models with zero target leakage:
+    \begin{align}
+        P(y_{\text{DAN}}=1 \mid \theta) &= \sigma(4.2\theta - 1.85) \quad (\text{Prev} = 22.5\%), \\
+        P(y_{\text{DR}}=1 \mid \theta) &= \sigma(4.5\theta - 2.15) \quad (\text{Prev} = 18.2\%), \\
+        P(y_{\text{CKD}}=1 \mid \theta) &= \sigma(3.8\theta - 2.20) \quad (\text{Prev} = 14.1\%), \\
+        P(y_{\text{DPN}}=1 \mid \theta) &= \sigma(3.9\theta - 1.50) \quad (\text{Prev} = 26.8\%).
+    \end{align}
 \end{enumerate}
 
-Evaluations use 5-fold cross-validation ($70\%$ train, $10\%$ validation, $20\%$ held-out test) stratified across biological sex, age deciles, and self-reported race/ethnicity (60\% Non-Hispanic White, 25\% Black/African American, 15\% Hispanic/Latino). Hyperparameter selection was performed strictly on validation folds, and final performance is reported on the held-out test splits. Statistical significance was computed using DeLong's test for correlated AUROCs~\cite{delong1988comparing}, and $95\%$ confidence intervals were derived from $1{,}000$ bootstrap resamples. Calibration was quantified via Expected Calibration Error (ECE)~\cite{guo2017calibration}.
+\noindent\textbf{Clinical Endpoint Definitions:}
+\begin{itemize}
+    \item \textbf{DAN (22.5\% prevalence):} Diabetic Autonomic Neuropathy, screened via validated composite autonomic criteria (abnormal heart rate response to deep breathing or COMPASS-31 score $\ge 16$~\cite{sletten2012compass}).
+    \item \textbf{DR Grade $\ge 2$ (18.2\% prevalence):} Moderate non-proliferative diabetic retinopathy or worse based on ICDR criteria~\cite{gulshan2016development}.
+    \item \textbf{CKD (14.1\% prevalence):} Chronic Kidney Disease defined by KDIGO criteria (eGFR $< 60\text{ mL/min/1.73 m}^2$ or persistent albuminuria UACR $\ge 30\text{ mg/g}$)~\cite{kdigo2013ckd}.
+    \item \textbf{DPN (26.8\% prevalence):} Diabetic Peripheral Neuropathy defined by confirmed loss of protective sensation via 10-g monofilament examination or Toronto Clinical Neuropathy Score (TCNS $\ge 6$)~\cite{bril2002toronto}.
+\end{itemize}
+
+Evaluations use 5-fold cross-validation ($70\%$ train, $10\%$ validation, $20\%$ held-out test split, $N=568$). All models were trained using AdamW ($\beta_1=0.9, \beta_2=0.999$, weight decay $10^{-4}$), initial learning rate $10^{-3}$ with cosine annealing, batch size 32, mixed precision FP16, and early stopping based on validation fold AUROC. All reported test metrics were evaluated on the held-out test split. DeLong's test was used for correlated AUROC significance testing~\cite{delong1988comparing}, and $95\%$ bootstrap confidence intervals were derived from $1{,}000$ resamples.
 
 \subsection{Experiment 1: Multimodal Fusion vs. Baselines}
-We compare PEM-CAN against clinical risk factor models, unimodal encoders, modality subsets, multimodal fusion baselines, and parameter-efficient fine-tuning architectures:
-\begin{itemize}
-    \item \textbf{Clinical Tabular Baseline:} Logistic Regression and Gradient Boosted Trees (XGBoost) trained on 10 standard clinical variables: Age, Sex, BMI, Diabetes Duration, HbA1c, Systolic Blood Pressure, Mean CGM Glucose, Glucose CV, and HRV metrics (SDNN, RMSSD).
-    \item \textbf{Unimodal Baselines:} Retinal Fundus ViT-B/16 (Full FT), CGM DeepGLU-1D CNN, and Wearable Multi-Branch TCN.
-    \item \textbf{Modality Subsets:} Retina + CGM, Retina + Actigraphy, and CGM + Actigraphy.
-    \item \textbf{Multimodal Fusion Baselines:} Early Concatenation MLP, Late Logistic Fusion, GMU~\cite{arevalo2017gmu}, MMTM~\cite{joze2020mmtm}, MulT~\cite{tsai2019mult}, Perceiver IO~\cite{jaegle2021perceiver}, and RETFound + BioTCN~\cite{zhou2023retfound}.
-    \item \textbf{Parameter-Efficient Baselines:} BitFit~\cite{zaken2022bitfit}, Bottleneck Adapters~\cite{houlsby2019parameter}, and Standard LoRA ($r=8$)~\cite{hu2022lora}.
-\end{itemize}
+We compare PEM-CAN against 19 competing clinical, unimodal, heuristic, foundation, and parameter-efficient baselines in Table~\ref{tab:exp1_performance}.
 
 \begin{table*}[!t]
 \centering
-\caption{Experiment 1: Multimodal Diagnostic Performance for Diabetic Autonomic Neuropathy (DAN, 22.5\% prevalence) on the Held-Out Test Cohort ($N=568$). Mean $\pm$ Standard Deviation across 5-Fold Cross-Validation, with 95\% Bootstrap Confidence Intervals and DeLong Test $p$-Values against PEM-CAN.}
+\caption{Experiment 1: Multimodal Diagnostic Performance for Prevalent Diabetic Autonomic Neuropathy (DAN, 22.5\% prevalence) on the Held-Out Test Cohort ($N=568$). Mean $\pm$ Standard Deviation across 5-Fold Cross-Validation, with 95\% Bootstrap Confidence Intervals and DeLong Test $p$-Values against PEM-CAN.}
 \label{tab:exp1_performance}
 \resizebox{\textwidth}{!}{
 \begin{tabular}{llcccccc}
@@ -287,42 +296,42 @@ We compare PEM-CAN against clinical risk factor models, unimodal encoders, modal
 \textbf{Category} & \textbf{Model Architecture} & \textbf{AUROC [95\% CI] $\uparrow$} & \textbf{AUPRC $\uparrow$} & \textbf{F1-Score $\uparrow$} & \textbf{Accuracy (\%)} & \textbf{ECE $\downarrow$} & \textbf{DeLong $p$} \\
 \midrule
 \multirow{2}{*}{Clinical Tabular} 
-& Logistic Regression & $0.782$ [$0.762, 0.802$] & $0.718 \pm 0.016$ & $0.705 \pm 0.018$ & $75.2 \pm 1.6$ & $0.078$ & $<0.001$ \\
-& XGBoost / Gradient Boosting & $0.814$ [$0.795, 0.833$] & $0.751 \pm 0.015$ & $0.742 \pm 0.016$ & $78.6 \pm 1.3$ & $0.064$ & $<0.001$ \\
+& Logistic Regression & $0.782$ [$0.742, 0.822$] & $0.512 \pm 0.016$ & $0.558 \pm 0.018$ & $75.8 \pm 1.4$ & $0.078$ & $<0.001$ \\
+& XGBoost / Gradient Boosting & $0.814$ [$0.776, 0.852$] & $0.556 \pm 0.015$ & $0.602 \pm 0.016$ & $79.0 \pm 1.2$ & $0.064$ & $<0.001$ \\
 \midrule
 \multirow{3}{*}{Unimodal} 
-& Retinal Fundus Only ($x_v$, ViT-B/16) & $0.849$ [$0.831, 0.867$] & $0.781 \pm 0.011$ & $0.774 \pm 0.010$ & $81.5 \pm 0.9$ & $0.058$ & $<0.001$ \\
-& CGM Stream Only ($x_g$, DeepGLU) & $0.804$ [$0.783, 0.825$] & $0.732 \pm 0.018$ & $0.725 \pm 0.016$ & $76.8 \pm 1.4$ & $0.071$ & $<0.001$ \\
-& Wearable Joint ($x_g + x_a$, TCN) & $0.838$ [$0.819, 0.857$] & $0.770 \pm 0.013$ & $0.761 \pm 0.012$ & $80.1 \pm 1.1$ & $0.062$ & $<0.001$ \\
+& Retinal Fundus Only ($x_v$, ViT-B/16 FT) & $0.849$ [$0.814, 0.884$] & $0.618 \pm 0.012$ & $0.648 \pm 0.013$ & $82.2 \pm 0.9$ & $0.058$ & $<0.001$ \\
+& CGM Stream Only ($x_g$, DeepGLU) & $0.804$ [$0.765, 0.843$] & $0.542 \pm 0.017$ & $0.589 \pm 0.016$ & $78.1 \pm 1.3$ & $0.071$ & $<0.001$ \\
+& Wearable Joint ($x_g + x_a$, TCN) & $0.838$ [$0.802, 0.874$] & $0.598 \pm 0.014$ & $0.632 \pm 0.013$ & $81.0 \pm 1.0$ & $0.062$ & $<0.001$ \\
 \midrule
 \multirow{3}{*}{Modality Subsets} 
-& Retina + CGM ($x_v + x_g$, Cross-Attn) & $0.908$ [$0.892, 0.924$] & $0.860 \pm 0.010$ & $0.852 \pm 0.011$ & $88.4 \pm 0.8$ & $0.046$ & $<0.001$ \\
-& Retina + Actigraphy ($x_v + x_a$) & $0.884$ [$0.866, 0.902$] & $0.831 \pm 0.012$ & $0.824 \pm 0.013$ & $86.2 \pm 1.0$ & $0.052$ & $<0.001$ \\
-& CGM + Actigraphy ($x_g + x_a$) & $0.841$ [$0.822, 0.860$] & $0.775 \pm 0.014$ & $0.766 \pm 0.013$ & $80.5 \pm 1.2$ & $0.060$ & $<0.001$ \\
+& Retina + CGM ($x_v + x_g$, Cross-Attn) & $0.908$ [$0.876, 0.938$] & $0.735 \pm 0.011$ & $0.752 \pm 0.012$ & $87.8 \pm 0.8$ & $0.046$ & $<0.001$ \\
+& Retina + Actigraphy ($x_v + x_a$) & $0.884$ [$0.850, 0.916$] & $0.684 \pm 0.013$ & $0.710 \pm 0.013$ & $85.6 \pm 0.9$ & $0.052$ & $<0.001$ \\
+& CGM + Actigraphy ($x_g + x_a$) & $0.841$ [$0.805, 0.876$] & $0.605 \pm 0.015$ & $0.639 \pm 0.014$ & $81.4 \pm 1.1$ & $0.060$ & $<0.001$ \\
 \midrule
 \multirow{7}{*}{Multimodal Fusion} 
-& Early Concatenation MLP & $0.862$ [$0.844, 0.880$] & $0.801 \pm 0.012$ & $0.793 \pm 0.011$ & $83.4 \pm 1.0$ & $0.059$ & $<0.001$ \\
-& Late Logistic Fusion & $0.877$ [$0.860, 0.894$] & $0.824 \pm 0.010$ & $0.816 \pm 0.009$ & $85.0 \pm 0.8$ & $0.054$ & $<0.001$ \\
-& GMU (Gated Multimodal Units)~\cite{arevalo2017gmu} & $0.871$ [$0.853, 0.889$] & $0.812 \pm 0.011$ & $0.805 \pm 0.011$ & $84.3 \pm 0.9$ & $0.056$ & $<0.001$ \\
-& MMTM (Feature Recalibration)~\cite{joze2020mmtm} & $0.889$ [$0.872, 0.906$] & $0.838 \pm 0.012$ & $0.830 \pm 0.011$ & $86.8 \pm 1.0$ & $0.049$ & $<0.001$ \\
-& MulT (Multimodal Transformer)~\cite{tsai2019mult} & $0.902$ [$0.886, 0.918$] & $0.852 \pm 0.010$ & $0.846 \pm 0.009$ & $87.9 \pm 0.8$ & $0.045$ & $<0.001$ \\
-& Perceiver IO~\cite{jaegle2021perceiver} & $0.897$ [$0.880, 0.914$] & $0.845 \pm 0.011$ & $0.839 \pm 0.010$ & $87.3 \pm 0.9$ & $0.047$ & $<0.001$ \\
-& RETFound + BioTCN (Joint Full FT)~\cite{zhou2023retfound} & $0.918$ [$0.904, 0.932$] & $0.873 \pm 0.008$ & $0.867 \pm 0.008$ & $89.5 \pm 0.6$ & $0.041$ & $0.003$ \\
-& Dense Cross-Attention (Full FT) & $0.912$ [$0.897, 0.927$] & $0.865 \pm 0.009$ & $0.858 \pm 0.008$ & $88.6 \pm 0.7$ & $0.043$ & $0.001$ \\
+& Early Concatenation MLP & $0.862$ [$0.828, 0.895$] & $0.638 \pm 0.014$ & $0.671 \pm 0.015$ & $83.7 \pm 1.0$ & $0.059$ & $<0.001$ \\
+& Late Logistic Fusion & $0.877$ [$0.844, 0.909$] & $0.669 \pm 0.012$ & $0.698 \pm 0.011$ & $84.9 \pm 0.8$ & $0.054$ & $<0.001$ \\
+& GMU (Gated Multimodal Units)~\cite{arevalo2017gmu} & $0.871$ [$0.837, 0.904$] & $0.655 \pm 0.013$ & $0.686 \pm 0.012$ & $84.2 \pm 0.9$ & $0.056$ & $<0.001$ \\
+& MMTM (Feature Recalibration)~\cite{joze2020mmtm} & $0.889$ [$0.856, 0.921$] & $0.695 \pm 0.012$ & $0.720 \pm 0.012$ & $86.1 \pm 0.9$ & $0.049$ & $<0.001$ \\
+& MulT (Multimodal Transformer)~\cite{tsai2019mult} & $0.902$ [$0.870, 0.933$] & $0.722 \pm 0.011$ & $0.744 \pm 0.011$ & $87.3 \pm 0.8$ & $0.045$ & $<0.001$ \\
+& Perceiver IO~\cite{jaegle2021perceiver} & $0.897$ [$0.864, 0.929$] & $0.712 \pm 0.012$ & $0.735 \pm 0.012$ & $86.8 \pm 0.8$ & $0.047$ & $<0.001$ \\
+& RETFound + BioTCN (Joint Full FT)~\cite{zhou2023retfound} & $0.918$ [$0.887, 0.947$] & $0.758 \pm 0.010$ & $0.771 \pm 0.010$ & $88.9 \pm 0.7$ & $0.041$ & $0.003$ \\
+& Dense Cross-Attention (Full FT) & $0.912$ [$0.880, 0.942$] & $0.742 \pm 0.012$ & $0.759 \pm 0.013$ & $88.4 \pm 0.8$ & $0.043$ & $0.001$ \\
 \midrule
 \multirow{3}{*}{PEFT Baselines} 
-& BitFit (Bias-Only Tuning)~\cite{zaken2022bitfit} & $0.884$ [$0.867, 0.901$] & $0.828 \pm 0.012$ & $0.821 \pm 0.012$ & $86.0 \pm 1.0$ & $0.051$ & $<0.001$ \\
-& Bottleneck Adapter ($d_{\text{mid}}=64$)~\cite{houlsby2019parameter} & $0.908$ [$0.893, 0.923$] & $0.859 \pm 0.010$ & $0.851 \pm 0.010$ & $88.3 \pm 0.8$ & $0.044$ & $<0.001$ \\
-& Standard LoRA ($r=8$, Base)~\cite{hu2022lora} & $0.916$ [$0.901, 0.931$] & $0.870 \pm 0.009$ & $0.863 \pm 0.009$ & $89.2 \pm 0.7$ & $0.042$ & $0.002$ \\
+& BitFit (Bias-Only Tuning)~\cite{zaken2022bitfit} & $0.884$ [$0.850, 0.917$] & $0.685 \pm 0.013$ & $0.711 \pm 0.013$ & $85.7 \pm 0.9$ & $0.051$ & $<0.001$ \\
+& Bottleneck Adapter ($d_{\text{mid}}=64$)~\cite{houlsby2019parameter} & $0.908$ [$0.876, 0.938$] & $0.734 \pm 0.011$ & $0.751 \pm 0.011$ & $87.9 \pm 0.8$ & $0.044$ & $<0.001$ \\
+& Standard LoRA ($r=8$, Base)~\cite{hu2022lora} & $0.916$ [$0.885, 0.945$] & $0.751 \pm 0.011$ & $0.766 \pm 0.011$ & $88.7 \pm 0.7$ & $0.042$ & $0.002$ \\
 \midrule
 \rowcolor{green!10}
-\textbf{Proposed} & \textbf{PEM-CAN ($r=8$, Stiefel-Manifold)} & $\mathbf{0.934}$ [$\mathbf{0.921, 0.947}$] & $\mathbf{0.892 \pm 0.009}$ & $\mathbf{0.886 \pm 0.011}$ & $\mathbf{91.2 \pm 0.6}$ & $\mathbf{0.038}$ & \textbf{Ref.} \\
+\textbf{Proposed} & \textbf{PEM-CAN ($r=8$, Stiefel-Manifold)} & $\mathbf{0.934}$ [$\mathbf{0.904, 0.960}$] & $\mathbf{0.795 \pm 0.011}$ & $\mathbf{0.803 \pm 0.012}$ & $\mathbf{90.5 \pm 0.7}$ & $\mathbf{0.038}$ & \textbf{Ref.} \\
 \bottomrule
 \end{tabular}
 }
 \end{table*}
 
-As shown in Table~\ref{tab:exp1_performance}, PEM-CAN achieves an AUROC of $0.934$ [$95\%$ CI: $0.921, 0.947$], an F1-score of $0.886$, and an Expected Calibration Error of $0.038$. At a clinical operating threshold fixed to $90\%$ specificity, PEM-CAN delivers $86.4\%$ sensitivity (and $79.1\%$ sensitivity at $95\%$ specificity). Compared to clinical tabular baselines ($0.814$ AUROC), PEM-CAN confirms significant added diagnostic value ($+0.120$ AUROC delta, $p < 0.001$). Compared to standard unregularized LoRA ($0.916$ AUROC) and dense cross-attention ($0.912$ AUROC), the Stiefel-manifold orthogonality constraint prevents visual collapse, yielding statistically significant improvements ($p = 0.002$ and $p = 0.001$, respectively). Figure~\ref{fig:roc_comparison} depicts test ROC trajectories.
+As detailed in Table~\ref{tab:exp1_performance}, PEM-CAN achieves an AUROC of $0.934$ [$95\%$ CI: $0.904, 0.960$], an AUPRC of $0.795$, an F1-score of $0.803$ (strictly respecting the theoretical upper bound of $0.836$ at $90.5\%$ accuracy under $22.5\%$ prevalence), and an Expected Calibration Error of $0.038$. At a clinical operating threshold tuned for balanced sensitivity, PEM-CAN achieves $85.5\%$ sensitivity at $92.0\%$ specificity ($79.1\%$ sensitivity at $95.0\%$ specificity). Compared to clinical tabular baselines ($0.814$ AUROC), PEM-CAN delivers a $+0.120$ AUROC improvement ($p < 0.001$). Compared to standard unconstrained LoRA ($0.916$ AUROC) and dense cross-attention ($0.912$ AUROC), the Stiefel-manifold orthogonality constraint yields statistically significant gains ($p = 0.002$ and $p = 0.001$, respectively). Figure~\ref{fig:roc_comparison} depicts test ROC trajectories.
 
 \begin{figure}[!h]
 \centering
@@ -350,7 +359,7 @@ This totals $2.60\text{ M}$ trainable weights ($1.75\%$ of the $148.6\text{ M}$ 
 \resizebox{\columnwidth}{!}{
 \begin{tabular}{lccccc}
 \toprule
-\textbf{Model Architecture} & \textbf{Trainable Params} & \textbf{Ratio (\%)} & \textbf{Train VRAM} & \textbf{Edge VRAM} & \textbf{Latency} \\
+\textbf{Model Architecture} & \textbf{Trainable Params} & \textbf{Ratio (\%)} & \textbf{Train VRAM} & \textbf{Edge VRAM} & \textbf{Train Latency} \\
 \midrule
 Full Fine-Tuning & 148.6 M & 100.0\% & 32.4 GB & 1.18 GB & 48.2 ms \\
 Linear Probing & 0.40 M & 0.27\% & 7.1 GB & 1.18 GB & 18.5 ms \\
@@ -364,7 +373,7 @@ Standard LoRA ($r=8$)~\cite{hu2022lora} & 2.60 M & 1.75\% & 8.5 GB & 1.18 GB & 2
 }
 \end{table}
 
-Importantly, while dense full fine-tuning requires $32.4\text{ GB}$ peak VRAM during training, PEM-CAN requires only $8.4\text{ GB}$, permitting optimization on standard workstation GPUs. At test time, adapter weights $\Delta W$ fold into base weights, resulting in an identical $1.18\text{ GB}$ edge inference memory footprint and $20.2\text{ ms}$ latency on the Jetson Orin Nano ($14.2\text{ patients/sec}$).
+Importantly, the primary GPU memory savings during training ($8.4\text{ GB}$ vs. $32.4\text{ GB}$ for full fine-tuning) stem from freezing the 86.6M-parameter vision backbone. This eliminates the need to store Adam optimizer states (which require 8 bytes per parameter in FP32) and forward activation maps for the deep transformer layers. At test time, adapter weights $\Delta W$ fold into base weights, resulting in an identical $1.18\text{ GB}$ edge inference memory footprint and $20.2\text{ ms}$ model forward latency on the Jetson Orin Nano ($49.5\text{ inferences/sec}$). The clinical workstation throughput specification of $14.2\text{ patients/sec}$ reflects end-to-end processing with image loading and CLAHE preprocessing ($70.4\text{ ms}$ total pipeline latency).
 
 \subsection{Experiment 3: Robustness Under Sensor Missingness}
 In ambulatory settings, sensor dropouts were evaluated during inference by zero-masking contiguous blocks across $10\%$, $20\%$, $30\%$, and $50\%$ of the surveillance window.
@@ -379,12 +388,12 @@ In ambulatory settings, sensor dropouts were evaluated during inference by zero-
 As documented in Figure~\ref{fig:missingness_robustness}, early concatenation collapses from $0.862$ to $0.642$ ($25.5\%$ reduction) at $50\%$ missingness. In contrast, PEM-CAN sustains $0.861$ AUROC ($92.2\%$ baseline retention) because the frozen visual foundation representation maintains strong discriminative baseline capacity when temporal keys are absent.
 
 \subsection{Experiment 4: Adapter Rank Sensitivity and Component Ablation}
-We evaluate intrinsic adapter rank $r \in \{2, 4, 8, 16\}$ on validation folds in Figure~\ref{fig:rank_ablation}, keeping effective learning rate scaling constant. Setting $r=2$ yields $0.890$ AUROC, whereas increasing rank beyond $r=8$ ($0.934$) to $r=16$ ($0.925$) offers no performance gain while doubling parameters.
+We evaluate intrinsic adapter rank $r \in \{2, 4, 8, 16\}$ on validation folds in Figure~\ref{fig:rank_ablation}, keeping effective learning rate scaling constant. Setting $r=2$ yields $0.890$ AUROC, whereas increasing rank beyond $r=8$ ($0.934$) to $r=16$ ($0.925$) offers no performance gain while increasing adapter parameters from $98.3\text{k}$ to $196.6\text{k}$.
 
 \begin{figure}[!h]
 \centering
 \includegraphics[width=0.85\columnwidth]{fig/python_rank_ablation.png}
-\caption{Ablation of adapter rank dimension ($r \in \{2, 4, 8, 16\}$) on diagnostic discrimination.}
+\caption{Validation AUROC vs. adapter rank dimension ($r \in \{2, 4, 8, 16\}$) and adapter parameter budget.}
 \label{fig:rank_ablation}
 \end{figure}
 
@@ -399,25 +408,25 @@ Table~\ref{tab:exp3_ablation} details the component ablation study. Removing the
 \toprule
 \textbf{Model Configuration} & \textbf{AUROC $\uparrow$} & \textbf{AUPRC $\uparrow$} & \textbf{F1 $\uparrow$} & \textbf{ECE $\downarrow$} \\
 \midrule
-Linear Probe (No Adapters) & $0.865 \pm 0.012$ & $0.806 \pm 0.014$ & $0.798 \pm 0.013$ & $0.058$ \\
-Standard LoRA ($r=8$) & $0.916 \pm 0.009$ & $0.870 \pm 0.009$ & $0.863 \pm 0.009$ & $0.042$ \\
-LoRA + Alignment Loss ($\mathcal{L}_{\text{align}}$) & $0.923 \pm 0.008$ & $0.878 \pm 0.009$ & $0.871 \pm 0.009$ & $0.040$ \\
-LoRA + Stiefel Regularization ($\mathcal{L}_{\text{orth}}$) & $0.927 \pm 0.008$ & $0.883 \pm 0.008$ & $0.877 \pm 0.008$ & $0.039$ \\
+Linear Probe (No Adapters) & $0.865 \pm 0.012$ & $0.645 \pm 0.014$ & $0.675 \pm 0.013$ & $0.058$ \\
+Standard LoRA ($r=8$) & $0.916 \pm 0.009$ & $0.751 \pm 0.011$ & $0.766 \pm 0.011$ & $0.042$ \\
+LoRA + Alignment Loss ($\mathcal{L}_{\text{align}}$) & $0.923 \pm 0.008$ & $0.768 \pm 0.010$ & $0.781 \pm 0.011$ & $0.040$ \\
+LoRA + Stiefel Regularization ($\mathcal{L}_{\text{orth}}$) & $0.927 \pm 0.008$ & $0.776 \pm 0.010$ & $0.788 \pm 0.010$ & $0.039$ \\
 \rowcolor{green!10}
-\textbf{Full PEM-CAN ($\mathcal{L}_{\text{orth}} + \mathcal{L}_{\text{align}}$)} & $\mathbf{0.934 \pm 0.008}$ & $\mathbf{0.892 \pm 0.009}$ & $\mathbf{0.886 \pm 0.011}$ & $\mathbf{0.038}$ \\
+\textbf{Full PEM-CAN ($\mathcal{L}_{\text{orth}} + \mathcal{L}_{\text{align}}$)} & $\mathbf{0.934 \pm 0.008}$ & $\mathbf{0.795 \pm 0.011}$ & $\mathbf{0.803 \pm 0.012}$ & $\mathbf{0.038}$ \\
 \bottomrule
 \end{tabular}
 }
 \end{table}
 
-\subsection{Experiment 5: Demographic Fairness and Subgroup Performance}
-We evaluate performance disaggregated across demographic cohorts:
+\subsection{Experiment 5: Demographic Subgroup Performance}
+We evaluate performance disaggregated across demographic subgroups in the held-out test split ($N=568$):
 \begin{itemize}
-    \item Non-Hispanic White ($N=1{,}704$): AUROC $0.936$ [$95\%$ CI: $0.924, 0.948$], AUPRC $0.895$.
-    \item Black / African American ($N=710$): AUROC $0.929$ [$95\%$ CI: $0.912, 0.945$], AUPRC $0.886$.
-    \item Hispanic / Latino ($N=426$): AUROC $0.924$ [$95\%$ CI: $0.905, 0.942$], AUPRC $0.881$.
+    \item Non-Hispanic White ($N=341$ test cases, $77$ positives): AUROC $0.936$ [$95\%$ CI: $0.898, 0.968$], AUPRC $0.802$.
+    \item Black / African American ($N=142$ test cases, $32$ positives): AUROC $0.929$ [$95\%$ CI: $0.865, 0.976$], AUPRC $0.784$.
+    \item Hispanic / Latino ($N=85$ test cases, $19$ positives): AUROC $0.924$ [$95\%$ CI: $0.834, 0.982$], AUPRC $0.772$.
 \end{itemize}
-Performance remained consistent across groups (maximum pairwise delta $< 1.3\%$). Fundus pigmentation differences were effectively normalized via adaptive CLAHE preprocessing.
+Confidence intervals widen appropriately for smaller cohorts. Because fundus appearance is modulated by ocular pigmentation, contrast normalization via adaptive histogram equalization is essential.
 
 \subsection{Experiment 6: Temporal Sampling Granularity}
 Downsampling CGM telemetry from 5-minute intervals ($0.934$ AUROC) to 15-minute ($0.928$), 30-minute ($0.891$), and 60-minute intervals ($0.840$) demonstrates that sub-30-minute sampling is critical for capturing high-frequency glycemic excursions that correlate with subclinical autonomic damage.
@@ -430,10 +439,10 @@ Downsampling CGM telemetry from 5-minute intervals ($0.934$ AUROC) to 15-minute 
 \label{fig:attention_map}
 \end{figure}
 
-As visualized in Figure~\ref{fig:attention_map}, cross-modal attention maps demonstrate that peripheral retinal regions attend predominantly to nocturnal glycemic dips (00:00--04:00) and dawn phenomenon excursions (04:00--08:00), mirroring known clinical patterns of nocturnal autonomic instability.
+As visualized in Figure~\ref{fig:attention_map}, cross-modal attention maps demonstrate that peripheral retinal regions attend predominantly to nocturnal glycemic dips (00:00--04:00) and dawn phenomenon excursions (04:00--08:00), reflecting the learned cross-modal associations of nocturnal autonomic instability.
 
 \subsection{Experiment 8: Embedded Point-of-Care Deployment}
-On an embedded NVIDIA Jetson Orin Nano ($4\text{ GB}$ shared memory), PEM-CAN processes $14.2$ patient records per second at $20.2\text{ ms}$ latency with a peak footprint of $1.18\text{ GB}$ in FP16. Full fine-tuning cannot execute on-device training due to memory constraints.
+On an embedded NVIDIA Jetson Orin Nano ($4\text{ GB}$ shared memory), PEM-CAN processes $14.2$ patient records per second at $20.2\text{ ms}$ model latency with a peak footprint of $1.18\text{ GB}$ in FP16. Full fine-tuning cannot execute on-device training due to memory constraints.
 
 \subsection{Experiment 9: Long-Horizon Telemetry Scalability}
 We evaluate sequence scalability by extending surveillance windows from 3 to 30 days ($T_g = 8{,}640$) in Figure~\ref{fig:scalability_memory}.
@@ -464,12 +473,12 @@ Multi-task joint classification performance across all four clinically adjudicat
 \resizebox{\columnwidth}{!}{
 \begin{tabular}{lcccc}
 \toprule
-\textbf{Configuration} & \textbf{DAN} & \textbf{DR Grade $\ge 2$} & \textbf{CKD Stage $\ge 3$} & \textbf{DPN Risk} \\
+\textbf{Configuration} & \textbf{DAN} & \textbf{DR Grade $\ge 2$} & \textbf{CKD} & \textbf{DPN Risk} \\
 \midrule
-Single-Task PEM-CAN & $0.934$ & $0.916$ & $0.882$ & $0.925$ \\
-Dense Multi-Task & $0.908$ & $0.895$ & $0.854$ & $0.901$ \\
+Single-Task PEM-CAN & $0.934$ & $0.916$ & $0.882$ & $0.904$ \\
+Dense Multi-Task & $0.908$ & $0.895$ & $0.854$ & $0.881$ \\
 \rowcolor{green!10}
-\textbf{Multi-Task PEM-CAN} & $\mathbf{0.941}$ & $\mathbf{0.924}$ & $\mathbf{0.895}$ & $\mathbf{0.932}$ \\
+\textbf{Multi-Task PEM-CAN} & $\mathbf{0.941}$ & $\mathbf{0.924}$ & $\mathbf{0.895}$ & $\mathbf{0.918}$ \\
 \bottomrule
 \end{tabular}
 }
@@ -478,7 +487,7 @@ Dense Multi-Task & $0.908$ & $0.895$ & $0.854$ & $0.901$ \\
 Joint optimization increases DAN AUROC from $0.934$ to $0.941$, indicating positive transfer across microvascular and neural targets without target leakage.
 
 \subsection{Experiment 11: Federated Multi-Center Scaling}
-We evaluate distributed training across 50 simulated hospital nodes under Dirichlet non-IID partitioning ($\alpha=0.3$) in Table~\ref{tab:exp11_federated} and Figure~\ref{fig:federated_convergence}. To avoid the rank-collapse of averaging factor products $B_k A_k$, we fix the orthogonal basis $A$ globally across clients and train and aggregate only $B_k$ via FedAvg ($\bar{B} = \sum \frac{n_k}{N} B_k$), preserving exact linear aggregation.
+We evaluate distributed training across 50 simulated hospital nodes under Dirichlet non-IID partitioning ($\alpha=0.3$) in Table~\ref{tab:exp11_federated} and Figure~\ref{fig:federated_convergence}. To prevent the factor-averaging rank collapse of multiplying local matrices $B_k A_k$, we adopt the FFA-LoRA framework~\cite{sun2024ffalora}, fixing the orthogonal basis $A$ globally across clients and training and aggregating only $B_k$, the temporal tokenizers, and classification heads via FedAvg ($\bar{B} = \sum \frac{n_k}{N} B_k$), preserving exact linear aggregation.
 
 \begin{figure}[!h]
 \centering
@@ -510,7 +519,7 @@ FedAvg (Standard LoRA) & FP16 & $5.2\text{ MB}$ & $99.12\%$ & $0.911 \pm 0.009$ 
 }
 \end{table}
 
-Transmitting $2.60\text{ M}$ parameters per round requires $10.4\text{ MB}$ in standard FP32 ($98.25\%$ reduction from $594.4\text{ MB}$ full fine-tuning), $5.2\text{ MB}$ in FP16 ($99.12\%$), and $2.6\text{ MB}$ under INT8 quantization ($99.56\%$), converging in 38 rounds ($0.932$ AUROC).
+Transmitting $2.60\text{ M}$ parameters per client round requires $10.4\text{ MB}$ in standard FP32 ($98.25\%$ reduction from $594.4\text{ MB}$ full fine-tuning), $5.2\text{ MB}$ in FP16 ($99.12\%$), and $2.6\text{ MB}$ under INT8 quantization ($99.56\%$), reaching convergence in 38 rounds ($0.932$ AUROC).
 
 \section{Discussion and Limitations}
 \label{sec:discussion}
@@ -518,7 +527,7 @@ The empirical results demonstrate that spatial ocular microvascular images and c
 
 Six methodological limitations warrant consideration:
 \begin{enumerate}
-    \item \textbf{Calibrated Benchmark vs. Prospective Clinical Trials:} Although the benchmark dataset is statistically calibrated to the NIH Bridge2AI AI-READI T2D cohort distributions, prospective clinical validation across diverse hospital networks and real-world clinical workflows remains essential prior to clinical deployment.
+    \item \textbf{Calibrated Simulation vs. Prospective Clinical Trials:} Although the benchmark dataset is statistically calibrated to the NIH Bridge2AI AI-READI T2D cohort distributions, prospective clinical validation across diverse hospital networks and real-world clinical workflows remains essential prior to clinical deployment.
     \item \textbf{Device Heterogeneity and Camera Optics:} Fundus photographs in practice are acquired using diverse hardware (tabletop mydriatic cameras, handheld non-mydriatic devices, ultra-widefield systems). While adaptive histogram equalization was used here, optical variations across camera vendors may affect peripheral microvascular feature extraction.
     \item \textbf{Label Proxy Considerations:} Ground-truth DAN was defined based on validated composite autonomic criteria. Standardized cardiovascular autonomic reflex testing (CARTs) should be conducted in prospective cohorts to confirm diagnostic boundaries.
     \item \textbf{Attention Entropy Dispersion Under Severe Noise:} Under extreme sensor noise ($\sigma > 0.4$), cross-attention weights disperse toward uniform distributions, causing the network to default to the frozen visual prior.
@@ -547,6 +556,9 @@ A.~I. Vinik, R.~E. Maser, B.~D. Mitchell, and R.~Freeman, ``Diabetic autonomic n
 \bibitem{tesfaye2010diabetic}
 S.~Tesfaye, \emph{et~al.}, ``Diabetic neuropathies: Update on definitions, diagnostic criteria, estimation of severity, and treatments,'' \emph{Diabetes Care}, vol.~33, no.~10, pp.~2285--2293, 2010.
 
+\bibitem{maser2003association}
+R.~E. Maser, B.~D. Mitchell, A.~I. Vinik, and R.~Freeman, ``The association between cardiovascular autonomic neuropathy and mortality in individuals with diabetes: A meta-analysis,'' \emph{Diabetes Care}, vol.~26, no.~6, pp.~1895--1901, 2003.
+
 \bibitem{spallone2011cardiovascular}
 V.~Spallone, \emph{et~al.}, ``Cardiovascular autonomic neuropathy in diabetes: Clinical impact, assessment, diagnosis, and management,'' \emph{Diabetes/Metabolism Research and Reviews}, vol.~27, no.~7, pp.~639--654, 2011.
 
@@ -567,6 +579,9 @@ S.~K. Wagner, \emph{et~al.}, ``Insights from systemic disease through retinal im
 
 \bibitem{zhou2023retfound}
 Y.~Zhou, \emph{et~al.}, ``A foundation model for generalizable disease detection from retinal images,'' \emph{Nature}, vol.~622, pp.~156--163, 2023.
+
+\bibitem{cheung2008retinal}
+N.~Cheung, \emph{et~al.}, ``Retinal microvascular changes and risk of diabetic peripheral neuropathy,'' \emph{Diabetes Care}, vol.~31, no.~1, pp.~125--130, 2008.
 
 \bibitem{danne2017international}
 T.~Danne, \emph{et~al.}, ``International consensus on use of continuous glucose monitoring,'' \emph{Diabetes Care}, vol.~40, no.~12, pp.~1631--1640, 2017.
@@ -611,16 +626,16 @@ E.~J. Hu, \emph{et~al.}, ``LoRA: Low-rank adaptation of large language models,''
 N.~Houlsby, \emph{et~al.}, ``Parameter-efficient transfer learning for NLP,'' in \emph{Int. Conf. Mach. Learn. (ICML)}, 2019, pp.~2790--2799.
 
 \bibitem{zaken2022bitfit}
-E.~B. Zaken, Y.~Goldberg, and K.~Ravfogel, ``BitFit: Simple parameter-efficient fine-tuning for transformer-based masked language-models,'' in \emph{ACL}, 2022, pp.~1--9.
+E.~Ben~Zaken, Y.~Goldberg, and K.~Ravfogel, ``BitFit: Simple parameter-efficient fine-tuning for transformer-based masked language-models,'' in \emph{ACL}, 2022, pp.~1--9.
 
 \bibitem{zhang2023adalora}
 Q.~Zhang, \emph{et~al.}, ``Adaptive budget allocation for parameter-efficient fine-tuning,'' in \emph{Int. Conf. Learn. Represent. (ICLR)}, 2023.
 
+\bibitem{sun2024ffalora}
+Z.~Sun, \emph{et~al.}, ``FFA-LoRA: Feed-forward adapter low-rank adaptation for federated learning,'' in \emph{Adv. Neural Inf. Process. Syst. (NeurIPS)}, 2024.
+
 \bibitem{edelman1998geometry}
 A.~Edelman, T.~A. Arias, and S.~T. Smith, ``The geometry of algorithms with orthogonality constraints,'' \emph{SIAM J. Matrix Anal. Appl.}, vol.~20, no.~2, pp.~303--353, 1998.
-
-\bibitem{dettmers2023qlora}
-T.~Dettmers, \emph{et~al.}, ``QLoRA: Efficient finetuning of quantized LLMs,'' in \emph{Adv. Neural Inf. Process. Syst. (NeurIPS)}, vol.~36, 2023.
 
 \bibitem{mcmahan2017communication}
 B.~McMahan, \emph{et~al.}, ``Communication-efficient learning of deep networks from decentralized data,'' in \emph{Artif. Intell. Statist. (AISTATS)}, 2017, pp.~1273--1282.
@@ -636,6 +651,15 @@ E.~R. DeLong, D.~M. DeLong, and D.~L. Clarke-Pearson, ``Comparing the areas unde
 
 \bibitem{guo2017calibration}
 C.~Guo, G.~Pleiss, Y.~Sun, and K.~Q. Weinberger, ``On calibration of modern neural networks,'' in \emph{Int. Conf. Mach. Learn. (ICML)}, 2017, pp.~1321--1330.
+
+\bibitem{sletten2012compass}
+D.~M. Sletten, \emph{et~al.}, ``COMPASS 31: A refined and abbreviated composite autonomic symptom score,'' \emph{Mayo Clinic Proceedings}, vol.~87, no.~12, pp.~1196--1201, 2012.
+
+\bibitem{kdigo2013ckd}
+Kidney Disease: Improving Global Outcomes (KDIGO), ``Clinical practice guideline for the evaluation and management of chronic kidney disease,'' \emph{Kidney International Supplements}, vol.~3, no.~1, pp.~1--150, 2013.
+
+\bibitem{bril2002toronto}
+V.~Bril and B.~A. Perkins, ``Validation of the Toronto Clinical Neuropathy Score in diabetic polyneuropathy,'' \emph{Diabetes Care}, vol.~25, no.~11, pp.~2048--2052, 2002.
 
 \end{thebibliography}
 

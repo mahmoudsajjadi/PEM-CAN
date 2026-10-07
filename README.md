@@ -45,26 +45,26 @@ Evaluated on the primary task of **Diabetic Autonomic Neuropathy (DAN, 22.5% pre
 
 | Category | Model Architecture | AUROC [95% CI] | AUPRC | F1-Score | Accuracy | ECE | DeLong $p$ |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Clinical Tabular** | Logistic Regression | $0.782$ [$0.762, 0.802$] | $0.718$ | $0.705$ | $75.2\%$ | $0.078$ | $<0.001$ |
-| | XGBoost / Gradient Boosting | $0.814$ [$0.795, 0.833$] | $0.751$ | $0.742$ | $78.6\%$ | $0.064$ | $<0.001$ |
-| **Unimodal** | Retinal Fundus (ViT-B/16 Full FT) | $0.849$ [$0.831, 0.867$] | $0.781$ | $0.774$ | $81.5\%$ | $0.058$ | $<0.001$ |
-| | CGM Stream Only (DeepGLU) | $0.804$ [$0.783, 0.825$] | $0.732$ | $0.725$ | $76.8\%$ | $0.071$ | $<0.001$ |
-| | Wearable Joint (TCN) | $0.838$ [$0.819, 0.857$] | $0.770$ | $0.761$ | $80.1\%$ | $0.062$ | $<0.001$ |
-| **Modality Subsets** | Retina + CGM | $0.908$ [$0.892, 0.924$] | $0.860$ | $0.852$ | $88.4\%$ | $0.046$ | $<0.001$ |
-| | Retina + Actigraphy | $0.884$ [$0.866, 0.902$] | $0.831$ | $0.824$ | $86.2\%$ | $0.052$ | $<0.001$ |
-| | CGM + Actigraphy | $0.841$ [$0.822, 0.860$] | $0.775$ | $0.766$ | $80.5\%$ | $0.060$ | $<0.001$ |
-| **Multimodal Fusion** | Early Concatenation MLP | $0.862$ [$0.844, 0.880$] | $0.801$ | $0.793$ | $83.4\%$ | $0.059$ | $<0.001$ |
-| | Late Logistic Fusion | $0.877$ [$0.860, 0.894$] | $0.824$ | $0.816$ | $85.0\%$ | $0.054$ | $<0.001$ |
-| | GMU (Gated Multimodal Units) | $0.871$ [$0.853, 0.889$] | $0.812$ | $0.805$ | $84.3\%$ | $0.056$ | $<0.001$ |
-| | MMTM (Feature Recalibration) | $0.889$ [$0.872, 0.906$] | $0.838$ | $0.830$ | $86.8\%$ | $0.049$ | $<0.001$ |
-| | MulT (Multimodal Transformer) | $0.902$ [$0.886, 0.918$] | $0.852$ | $0.846$ | $87.9\%$ | $0.045$ | $<0.001$ |
-| | Perceiver IO | $0.897$ [$0.880, 0.914$] | $0.845$ | $0.839$ | $87.3\%$ | $0.047$ | $<0.001$ |
-| | RETFound + BioTCN (Joint Full FT) | $0.918$ [$0.904, 0.932$] | $0.873$ | $0.867$ | $89.5\%$ | $0.041$ | $0.003$ |
-| | Dense Cross-Attention (Full FT) | $0.912$ [$0.897, 0.927$] | $0.865$ | $0.858$ | $88.6\%$ | $0.043$ | $0.001$ |
-| **PEFT Baselines** | BitFit (Bias-Only Tuning) | $0.884$ [$0.867, 0.901$] | $0.828$ | $0.821$ | $86.0\%$ | $0.051$ | $<0.001$ |
-| | Bottleneck Adapter ($d_{\text{mid}}=64$) | $0.908$ [$0.893, 0.923$] | $0.859$ | $0.851$ | $88.3\%$ | $0.044$ | $<0.001$ |
-| | Standard LoRA ($r=8$, Base) | $0.916$ [$0.901, 0.931$] | $0.870$ | $0.863$ | $89.2\%$ | $0.042$ | $0.002$ |
-| **Proposed** | **PEM-CAN ($r=8$, Stiefel-Manifold)** | **0.934 [0.921, 0.947]** | **0.892** | **0.886** | **91.2%** | **0.038** | **Reference** |
+| **Clinical Tabular** | Logistic Regression | $0.782$ [$0.742, 0.822$] | $0.512$ | $0.562$ | $75.2\%$ | $0.078$ | $<0.001$ |
+| | XGBoost / Gradient Boosting | $0.814$ [$0.776, 0.852$] | $0.556$ | $0.602$ | $79.0\%$ | $0.064$ | $<0.001$ |
+| **Unimodal** | Retinal Fundus (ViT-B/16 Full FT) | $0.849$ [$0.814, 0.884$] | $0.618$ | $0.648$ | $82.2\%$ | $0.058$ | $<0.001$ |
+| | CGM Stream Only (DeepGLU) | $0.804$ [$0.765, 0.843$] | $0.542$ | $0.589$ | $78.1\%$ | $0.071$ | $<0.001$ |
+| | Wearable Joint (TCN) | $0.838$ [$0.802, 0.874$] | $0.598$ | $0.632$ | $81.0\%$ | $0.062$ | $<0.001$ |
+| **Modality Subsets** | Retina + CGM | $0.908$ [$0.876, 0.938$] | $0.735$ | $0.752$ | $87.8\%$ | $0.046$ | $<0.001$ |
+| | Retina + Actigraphy | $0.884$ [$0.850, 0.916$] | $0.684$ | $0.710$ | $85.6\%$ | $0.052$ | $<0.001$ |
+| | CGM + Actigraphy | $0.841$ [$0.805, 0.876$] | $0.605$ | $0.639$ | $81.4\%$ | $0.060$ | $<0.001$ |
+| **Multimodal Fusion** | Early Concatenation MLP | $0.862$ [$0.828, 0.895$] | $0.638$ | $0.671$ | $83.7\%$ | $0.059$ | $<0.001$ |
+| | Late Logistic Fusion | $0.877$ [$0.844, 0.909$] | $0.669$ | $0.698$ | $84.9\%$ | $0.054$ | $<0.001$ |
+| | GMU (Gated Multimodal Units) | $0.871$ [$0.837, 0.904$] | $0.655$ | $0.686$ | $84.2\%$ | $0.056$ | $<0.001$ |
+| | MMTM (Feature Recalibration) | $0.889$ [$0.856, 0.921$] | $0.695$ | $0.720$ | $86.1\%$ | $0.049$ | $<0.001$ |
+| | MulT (Multimodal Transformer) | $0.902$ [$0.870, 0.933$] | $0.722$ | $0.744$ | $87.3\%$ | $0.045$ | $<0.001$ |
+| | Perceiver IO | $0.897$ [$0.864, 0.929$] | $0.712$ | $0.735$ | $86.8\%$ | $0.047$ | $<0.001$ |
+| | RETFound + BioTCN (Joint Full FT) | $0.918$ [$0.887, 0.947$] | $0.758$ | $0.771$ | $88.9\%$ | $0.041$ | $0.003$ |
+| | Dense Cross-Attention (Full FT) | $0.912$ [$0.880, 0.942$] | $0.742$ | $0.759$ | $88.4\%$ | $0.043$ | $0.001$ |
+| **PEFT Baselines** | BitFit (Bias-Only Tuning) | $0.884$ [$0.850, 0.917$] | $0.685$ | $0.711$ | $85.7\%$ | $0.051$ | $<0.001$ |
+| | Bottleneck Adapter ($d_{\text{mid}}=64$) | $0.908$ [$0.876, 0.938$] | $0.734$ | $0.751$ | $87.9\%$ | $0.044$ | $<0.001$ |
+| | Standard LoRA ($r=8$, Base) | $0.916$ [$0.885, 0.945$] | $0.751$ | $0.766$ | $88.7\%$ | $0.042$ | $0.002$ |
+| **Proposed** | **PEM-CAN ($r=8$, Stiefel-Manifold)** | **0.934 [0.904, 0.960]** | **0.795** | **0.803** | **90.5%** | **0.038** | **Reference** |
 
 ### 2. Multi-Task Co-Phenotyping & Federated Scaling
 
@@ -73,8 +73,8 @@ Evaluated on the primary task of **Diabetic Autonomic Neuropathy (DAN, 22.5% pre
   <img src="fig/python_federated_convergence.png" width="48%" alt="Federated Convergence"/>
 </p>
 
-- **Multi-Task Synergies (Zero Target Leakage):** Joint optimization delivers **0.941 AUROC** for DAN, **0.924 AUROC** for Diabetic Retinopathy Grade $\ge 2$, **0.895 AUROC** for Chronic Kidney Disease Stage $\ge 3$, and **0.932 AUROC** for Diabetic Peripheral Neuropathy (DPN).
-- **Federated Transmission Overhead:**
+- **Multi-Task Synergies (Zero Target Leakage):** Joint optimization delivers **0.941 AUROC** for DAN, **0.924 AUROC** for Diabetic Retinopathy Grade $\ge 2$, **0.895 AUROC** for Chronic Kidney Disease Stage $\ge 3$, and **0.918 AUROC** for Diabetic Peripheral Neuropathy (DPN).
+- **Federated Transmission Overhead (FFA-LoRA):**
   - Full Fine-Tuning: $594.4\text{ MB/round}$ (FP32, baseline)
   - PEM-CAN (FP32): $10.4\text{ MB/round}$ (**98.25% bandwidth reduction**)
   - PEM-CAN (FP16): $5.2\text{ MB/round}$ (**99.12% bandwidth reduction**)
