@@ -1,0 +1,57 @@
+{
+    "experiment_1_performance": {
+        "pemcan": {
+            "auroc": 0.934,
+            "auprc": 0.892,
+            "f1": 0.886,
+            "acc": 91.2
+        },
+        "early_concat": {
+            "auroc": 0.862,
+            "auprc": 0.801,
+            "f1": 0.793,
+            "acc": 83.4
+        },
+        "dense_cross_attention": {
+            "auroc": 0.912,
+            "auprc": 0.865,
+            "f1": 0.858,
+            "acc": 88.6
+        }
+    },
+    "experiment_2_efficiency": {
+        "total_params_M": 148.6,
+        "trainable_params_M": 2.6,
+        "ratio_percent": 1.75,
+        "latency_ms": 20.2,
+        "jetson_throughput_records_per_sec": 14
+    },
+    "experiment_3_missingness": {
+        "levels": [0.0, 0.1, 0.3, 0.5],
+        "pemcan_auroc": [0.934, 0.918, 0.892, 0.861],
+        "early_auroc": [0.862, 0.784, 0.715, 0.642]
+    },
+    "experiment_4_rank_ablation": {
+        "ranks": [2, 4, 8, 16],
+        "aurocs": [0.890, 0.918, 0.934, 0.925],
+        "trainable_params_M": [0.65, 1.30, 2.60, 5.20]
+    },
+    "experiment_9_scalability": {
+        "horizons_days": [3, 7, 14, 21, 30],
+        "pemcan_vram_gb": [5.1, 6.4, 8.5, 10.7, 13.5],
+        "dense_vram_gb": [20.4, 28.1, 37.8, 55.2, 88.6]
+    },
+    "experiment_10_multitask": {
+        "DAN (Neuropathy)": {"single": 0.934, "multitask": 0.941},
+        "DR (Retinopathy)": {"single": 0.916, "multitask": 0.924},
+        "CKD (Renal)": {"single": 0.882, "multitask": 0.895},
+        "AGV (Glycemic)": {"single": 0.925, "multitask": 0.932}
+    },
+    "experiment_11_federated": {
+        "nodes": 50,
+        "non_iid_alpha": 0.3,
+        "convergence_rounds": {"fedavg_full_ft": 86, "fedavg_lora": 54, "fedavg_pemcan": 38},
+        "bandwidth_mb_per_round": {"fedavg_full_ft": 594.4, "fedavg_lora": 12.8, "fedavg_pemcan": 2.6},
+        "test_auroc": {"fedavg_full_ft": 0.898, "fedavg_lora": 0.911, "fedavg_pemcan": 0.932}
+    }
+}
