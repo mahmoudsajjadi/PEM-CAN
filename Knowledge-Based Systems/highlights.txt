@@ -1,0 +1,5 @@
+PEM-CAN fuses retinal images with continuous sensor streams for neuropathy staging.
+Orthogonal Stiefel adapters update 1.75% weights, slashing VRAM from 32.4 to 8.4 GB.
+Model achieves 0.934 AUROC and retains 0.861 AUROC under 50% sensor packet loss.
+FFA-LoRA federated training slashes client communication bandwidth by 98.25%.
+Edge deployment achieves 20.2 ms forward latency on embedded Jetson Orin Nano.

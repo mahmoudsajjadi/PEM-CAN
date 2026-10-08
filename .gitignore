@@ -25,3 +25,7 @@ desktop.ini
 
 # Scratch / layout preview images
 preview_pages/
+preview_p*.png
+new_preview_p*.png
+*.abs
+els-cas-templates.zip
