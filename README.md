@@ -162,15 +162,18 @@ The resulting camera-ready PDF is [`main.pdf`](main.pdf).
 
 ## 📖 Citation
 
+> [!NOTE]
+> This manuscript is currently **Under Review** in *Knowledge-Based Systems* (Elsevier).
+
 If you find PEM-CAN useful in your research, please cite:
 
 ```bibtex
 @article{sajjadi2026pemcan,
-  title={PEM-CAN: Parameter-Efficient Multimodal Diabetic Neuropathy Detection},
-  author={Sajjadi Mohammadabadi, Seyed Mahmoud},
-  journal={IEEE Journal of Biomedical and Health Informatics},
-  year={2026},
-  publisher={IEEE}
+  title   = {PEM-CAN: Parameter-Efficient Multimodal Fusion for Diabetic Neuropathy Screening},
+  author  = {Sajjadi Mohammadabadi, Seyed Mahmoud},
+  journal = {Under Review},
+  note    = {Submitted to Knowledge-Based Systems (Elsevier)},
+  year    = {2026}
 }
 ```
 
