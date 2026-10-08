@@ -1,14 +1,18 @@
-# PEM-CAN: Parameter-Efficient Multimodal Fusion for Diabetic Neuropathy Screening: Architectural Framework and Simulation Benchmarking
+# PEM-CAN: Parameter-Efficient Multimodal Fusion for Diabetic Neuropathy Screening
 
 [![Paper](https://img.shields.io/badge/Paper-IEEE%20JBHI-blue.svg)](main.pdf)
 [![Status](https://img.shields.io/badge/Compilation-Success%20(Exit%200)-brightgreen.svg)](main.pdf)
 [![PyTorch](https://img.shields.io/badge/PyTorch-v2.14-EE4C2C.svg)](scripts/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Benchmark](https://img.shields.io/badge/Benchmark-Calibrated%20AI--READI%20(N%3D2%2C840)-purple.svg)](scripts/dataset_sim.py)
+[![ORCID](https://img.shields.io/badge/ORCID-0009--0001--9629--9734-A6CE39.svg)](https://orcid.org/0009-0001-9629-9734)
 
 Official PyTorch implementation and reproduction package for the manuscript:  
-**"PEM-CAN: Parameter-Efficient Multimodal Fusion for Diabetic Neuropathy Screening: Architectural Framework and Simulation Benchmarking"**  
-*Seyed Mahmoud Sajjadi Mohammadabadi* — Department of Computer Science and Engineering, University of Nevada, Reno.
+**"PEM-CAN: Parameter-Efficient Multimodal Fusion for Diabetic Neuropathy Screening"**  
+*Seyed Mahmoud Sajjadi Mohammadabadi*<sup>1,2</sup>  
+<sup>1</sup>Battle Born AI, Nevada Center for Applied Research, University of Nevada, Reno, NV 89557, USA  
+<sup>2</sup>Department of Computer Science and Engineering, University of Nevada, Reno, NV 89557, USA  
+[ORCID: 0009-0001-9629-9734](https://orcid.org/0009-0001-9629-9734)
 
 ---
 
