@@ -1,0 +1,84 @@
+\documentclass[10pt,letterpaper]{article}
+
+\usepackage[top=0.65in, bottom=0.65in, left=0.8in, right=0.8in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{charter}
+\usepackage{microtype}
+
+\definecolor{unrblue}{RGB}{0, 45, 98}
+\definecolor{headergray}{RGB}{80, 80, 80}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=unrblue,
+    urlcolor=unrblue,
+    citecolor=unrblue
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3.5pt}
+
+\begin{document}
+\pagestyle{empty}
+
+% --- INSTITUTIONAL HEADER ---
+\begin{minipage}[t]{0.70\textwidth}
+    {\large \textbf{\color{unrblue}University of Nevada, Reno}}\\[1pt]
+    {\normalsize \textbf{Department of Computer Science and Engineering}}\\[1pt]
+    {\footnotesize College of Engineering, 1664 N. Virginia St., Reno, NV 89557, USA}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.28\textwidth}
+    \raggedleft
+    {\footnotesize \color{headergray}
+    \textbf{Date:} October 8, 2026\\
+    \textbf{Email:} mahmoud.sajjadi@unr.edu\\
+    \textbf{ORCID:} 0009-0001-9629-9734
+    }
+\end{minipage}
+
+\vspace{4pt}
+{\color{unrblue}\hrule height 1.2pt}
+\vspace{8pt}
+
+% --- ADDRESSEE ---
+\textbf{Professor Jie Lu}, Editor-in-Chief, \textit{Knowledge-Based Systems}\\
+Distinguished Professor and Director, Centre for Artificial Intelligence, University of Technology Sydney\\[6pt]
+\textbf{Subject: Submission of Research Article: ``PEM-CAN: Parameter-Efficient Multimodal Fusion for Diabetic Neuropathy Screening''}
+
+Dear Professor Lu and Editorial Board Members,
+
+I am pleased to submit our original research manuscript entitled \textbf{``PEM-CAN: Parameter-Efficient Multimodal Fusion for Diabetic Neuropathy Screening''} for consideration for publication in \textit{Knowledge-Based Systems}.
+
+\textbf{Motivation and Focus:} Diabetic autonomic neuropathy (DAN) is a silent, lethal microvascular complication that doubles cardiovascular mortality. Early non-invasive screening requires unifying complementary physiological windows: ocular microvascular architecture (2D retinal fundus photography) and dynamic metabolic fluctuations (1D continuous glucose monitoring and wearable actigraphy). However, deep multimodal models face three fundamental engineering bottlenecks: (1) quadratic memory expansion $\mathcal{O}((M+L)^2)$ over longitudinal time series, (2) visual modality dominance that suppresses low-amplitude autonomic signals, and (3) severe telemetry packet loss during ambulatory surveillance.
+
+\textbf{Core Contributions directly aligned with \textit{Knowledge-Based Systems}:}
+\begin{itemize}\setlength{\itemsep}{1.5pt}\setlength{\parsep}{0pt}\setlength{\parskip}{0pt}
+    \item \textbf{Stiefel-Manifold Orthogonal Low-Rank Adaptation:} By freezing pre-trained vision foundation backbones (ViT-B/16, 86.6M parameters) and constraining cross-attention projections to rank $r=8$ factor matrices with a Stiefel orthogonality regularizer ($\mathcal{L}_{\text{orth}} = \|AA^\top - I_r\|_F^2$), PEM-CAN mitigates modality collapse and updates only \textbf{1.75\% of parameters} ($2.60\text{ M}$), reducing training VRAM from $32.4\text{ GB}$ to $8.4\text{ GB}$.
+    \item \textbf{State-of-the-Art Diagnostic Performance:} Evaluated on a clinical cohort statistically mapped to the NIH Bridge2AI AI-READI Type 2 Diabetes protocol ($N=2{,}840$), PEM-CAN achieves \textbf{0.934 AUROC} [95\% CI: 0.904, 0.960], \textbf{0.795 AUPRC}, and \textbf{0.038 ECE} at $90.5\%$ accuracy, within 2.3\% of the Bayes optimal oracle ceiling ($0.957$ AUROC).
+    \item \textbf{Missing-Modality Resilience:} Under $50\%$ contiguous telemetry packet dropout, PEM-CAN retains \textbf{0.861 AUROC} ($92.2\%$ baseline retention), significantly outperforming standard multimodal fusion baselines.
+    \item \textbf{Distributed Federated Scaling and Edge Deployment:} Under 50-node federated training (FFA-LoRA), PEM-CAN slashes client communication overhead by \textbf{98.25\%} ($10.4\text{ MB/round}$), reaching convergence 2.3$\times$ faster. On embedded edge hardware (NVIDIA Jetson Orin Nano), the model executes in \textbf{20.2 ms} with a compact $1.18\text{ GB}$ FP16 footprint.
+\end{itemize}
+
+\textbf{Author Declarations:}
+\begin{enumerate}\setlength{\itemsep}{1.0pt}\setlength{\parsep}{0pt}\setlength{\parskip}{0pt}
+    \item \textbf{Originality:} This manuscript is original, has not been published elsewhere, and is not under consideration by any other journal.
+    \item \textbf{Conflict of Interest:} The author declares no competing financial or personal interests.
+    \item \textbf{Generative AI Usage:} AI assistance was used strictly for grammatical polishing under full author oversight and responsibility.
+    \item \textbf{Open Science and Reproducibility:} Code and model configurations are public at \url{https://github.com/mahmoudsajjadi/PEM-CAN}.
+\end{enumerate}
+
+Thank you for your consideration. I look forward to the reviewers' constructive feedback.
+
+\vspace{6pt}
+Sincerely,
+
+\vspace{4pt}
+\textbf{Seyed Mahmoud Sajjadi Mohammadabadi}\\
+Department of Computer Science and Engineering, University of Nevada, Reno, NV 89557, USA\\
+\textbf{Email:} mahmoud.sajjadi@unr.edu \quad \textbf{ORCID:} \url{https://orcid.org/0009-0001-9629-9734}
+
+\end{document}

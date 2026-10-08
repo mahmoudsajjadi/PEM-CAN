@@ -1,0 +1,26 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=1.2in]{geometry}
+\usepackage{xcolor}
+\usepackage{charter}
+\usepackage{microtype}
+
+\definecolor{unrblue}{RGB}{0, 45, 98}
+
+\begin{document}
+\pagestyle{empty}
+
+{\LARGE \textbf{\color{unrblue}Highlights}}\\[4pt]
+{\large \textit{PEM-CAN: Parameter-Efficient Multimodal Fusion for Diabetic Neuropathy Screening}}\\[12pt]
+{\color{unrblue}\hrule height 1.2pt}
+\vspace{18pt}
+
+\begin{itemize}\setlength{\itemsep}{12pt}
+    \item PEM-CAN fuses retinal images with continuous sensor streams for neuropathy staging.
+    \item Orthogonal Stiefel adapters update 1.75\% weights, slashing VRAM from 32.4 to 8.4 GB.
+    \item Model achieves 0.934 AUROC and retains 0.861 AUROC under 50\% sensor packet loss.
+    \item FFA-LoRA federated training slashes client communication bandwidth by 98.25\%.
+    \item Edge deployment achieves 20.2 ms forward latency on embedded Jetson Orin Nano.
+\end{itemize}
+
+\end{document}
