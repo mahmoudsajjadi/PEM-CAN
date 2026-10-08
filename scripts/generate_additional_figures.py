@@ -17,7 +17,7 @@ os.makedirs(FIG_DIR, exist_ok=True)
 # -------------------------------------------------------------------------
 # Figure 9: Federated Convergence & Communication Payload
 # -------------------------------------------------------------------------
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10.5, 4.4), dpi=300)
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10.0, 4.4), dpi=300)
 
 rounds = np.arange(1, 101)
 
@@ -31,46 +31,52 @@ auc_pemcan = conv_curve(rounds, 0.932, rate=9.5)
 auc_lora   = conv_curve(rounds, 0.911, rate=15.0)
 auc_full   = conv_curve(rounds, 0.898, rate=24.0, noise_std=0.006)
 
-ax1.plot(rounds, auc_pemcan, color='#DC2626', lw=2.2, label='FFA-LoRA + PEM-CAN (38 rounds)')
-ax1.plot(rounds, auc_lora, color='#2563EB', lw=1.8, linestyle='--', label='FedAvg + Standard LoRA (54 rounds)')
-ax1.plot(rounds, auc_full, color='#4B5563', lw=1.5, linestyle=':', label='FedAvg + Full FT (86 rounds)')
-
-ax1.axhline(0.930, color='#DC2626', linestyle='--', alpha=0.4)
-ax1.set_xlabel('Federated Communication Rounds', fontsize=10.5, fontweight='bold')
-ax1.set_ylabel('Global Test AUROC', fontsize=10.5, fontweight='bold')
-ax1.set_title('(a) Multi-Center Optimization Trajectory', fontsize=11, fontweight='bold')
-ax1.set_xlim(1, 100)
-ax1.set_ylim(0.70, 0.95)
-ax1.legend(loc='lower right', fontsize=8.5, frameon=True)
-ax1.grid(True, linestyle='--', alpha=0.5)
-
-# Cumulative Transmitted Data (GB) across 50 nodes matching Table IV
-# Full FT (FP32): 594.4 MB * 50 = 29.72 GB / round
-# Standard LoRA (FP32): 10.4 MB * 50 = 0.52 GB / round
-# FFA-LoRA + PEM-CAN (FP32): 10.4 MB * 50 = 0.52 GB / round
-# FFA-LoRA + PEM-CAN (FP16): 5.2 MB * 50 = 0.26 GB / round
-# FFA-LoRA + PEM-CAN (INT8): 2.6 MB * 50 = 0.13 GB / round
-cum_full   = rounds * 29.72
-cum_lora   = rounds * 0.52
+cum_full        = rounds * 29.72
+cum_lora        = rounds * 0.52
 cum_pemcan_fp32 = rounds * 0.52
 cum_pemcan_int8 = rounds * 0.13
 
-ax2.plot(rounds, cum_pemcan_int8, color='#DC2626', lw=2.2, label='FFA-LoRA + PEM-CAN (INT8: 2.6 MB/client, 0.13 GB/rd)')
-ax2.plot(rounds, cum_pemcan_fp32, color='#EA580C', lw=1.8, linestyle='-.', label='FFA-LoRA + PEM-CAN (FP32: 10.4 MB/client, 0.52 GB/rd)')
-ax2.plot(rounds, cum_lora, color='#2563EB', lw=1.8, linestyle='--', label='Standard LoRA (FP32: 10.4 MB/client, 0.52 GB/rd)')
-ax2.plot(rounds, cum_full, color='#4B5563', lw=1.5, linestyle=':', label='Full Fine-Tuning (FP32: 594.4 MB/client, 29.7 GB/rd)')
+# (a) Multi-Center Convergence
+ax1.plot(rounds, auc_pemcan, color='#DC2626', lw=2.8, label='FFA-LoRA + PEM-CAN (38 rounds)')
+ax1.plot(rounds, auc_lora, color='#2563EB', lw=2.2, linestyle='--', label='FedAvg + Standard LoRA (54 rounds)')
+ax1.plot(rounds, auc_full, color='#4B5563', lw=2.0, linestyle=':', label='FedAvg + Full FT (86 rounds)')
+
+ax1.axhline(0.930, color='#DC2626', linestyle='--', lw=1.3, alpha=0.5)
+ax1.plot([38, 38], [0.70, 0.930], color='#DC2626', linestyle=':', lw=1.5, alpha=0.6)
+ax1.scatter([38], [0.930], color='#DC2626', s=65, zorder=5, edgecolors='white', linewidth=1.5)
+
+ax1.set_xlabel('Federated Communication Rounds', fontsize=12.5, fontweight='bold', labelpad=8)
+ax1.set_ylabel('Global Test AUROC', fontsize=12.5, fontweight='bold', labelpad=8)
+ax1.set_title('(a) Multi-Center AUROC Convergence', fontsize=13.5, fontweight='bold', pad=12)
+ax1.set_xlim(1, 100)
+ax1.set_ylim(0.70, 0.955)
+ax1.tick_params(axis='both', which='major', labelsize=11.5, width=1.2, length=5)
+ax1.legend(loc='lower right', fontsize=10.2, frameon=True, framealpha=0.95, edgecolor='#CBD5E1')
+ax1.grid(True, linestyle='--', alpha=0.55)
+
+# (b) Cumulative Bandwidth
+ax2.plot(rounds, cum_pemcan_int8, color='#DC2626', lw=2.8, label='FFA-LoRA + PEM-CAN (INT8: 2.6 MB/client)')
+ax2.plot(rounds, cum_pemcan_fp32, color='#EA580C', lw=2.2, linestyle='-.', label='FFA-LoRA + PEM-CAN (FP32: 10.4 MB/client)')
+ax2.plot(rounds, cum_lora, color='#2563EB', lw=2.2, linestyle='--', label='Standard LoRA (FP32: 10.4 MB/client)')
+ax2.plot(rounds, cum_full, color='#4B5563', lw=2.0, linestyle=':', label='Full Fine-Tuning (FP32: 594.4 MB/client)')
 
 ax2.set_yscale('log')
-ax2.set_xlabel('Federated Communication Rounds', fontsize=10.5, fontweight='bold')
-ax2.set_ylabel('Cumulative Transmitted Data (GB) [Log Scale]', fontsize=10.5, fontweight='bold')
-ax2.set_title('(b) Cumulative Network Bandwidth Overhead (50 Nodes)', fontsize=11, fontweight='bold')
+ax2.set_xlabel('Federated Communication Rounds', fontsize=12.5, fontweight='bold', labelpad=8)
+ax2.set_ylabel('Cumulative Transmitted Data (GB) [Log Scale]', fontsize=11.5, fontweight='bold', labelpad=8)
+ax2.set_title('(b) Cumulative Bandwidth (50 Nodes)', fontsize=13.5, fontweight='bold', pad=12)
 ax2.set_xlim(1, 100)
-ax2.legend(loc='upper left', fontsize=7.8, frameon=True)
-ax2.grid(True, which='both', linestyle='--', alpha=0.5)
+ax2.set_ylim(0.08, 4800)
+ax2.tick_params(axis='both', which='major', labelsize=11.5, width=1.2, length=5)
+ax2.legend(loc='upper left', fontsize=9.6, frameon=True, framealpha=0.95, edgecolor='#CBD5E1')
+ax2.grid(True, which='both', linestyle='--', alpha=0.55)
 
-plt.tight_layout()
+plt.subplots_adjust(left=0.085, right=0.98, top=0.91, bottom=0.15, wspace=0.26)
 fed_fig_path = os.path.join(FIG_DIR, 'python_federated_convergence.png')
 plt.savefig(fed_fig_path, dpi=300)
+# Also copy to KBS directory
+kbs_fig = os.path.join(os.path.dirname(FIG_DIR), 'Knowledge-Based Systems', 'fig', 'python_federated_convergence.png')
+if os.path.exists(os.path.dirname(kbs_fig)):
+    plt.savefig(kbs_fig, dpi=300)
 plt.close()
 print(f"Saved: {fed_fig_path}")
 

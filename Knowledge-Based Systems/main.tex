@@ -482,12 +482,12 @@ Joint optimization increases DAN AUROC from $0.934$ to $0.941$, indicating posit
 \label{sec:edge_federated}
 We evaluate distributed training across 50 simulated hospital nodes under Dirichlet non-IID partitioning ($\alpha=0.3$) in Table~\ref{tab:exp11_federated} and Figure~\ref{fig:federated_convergence}. To prevent the factor-averaging rank collapse of multiplying local matrices $B_k A_k$, we adopt the FFA-LoRA framework~\cite{sun2024ffalora}, fixing the orthogonal basis $A$ globally across clients and training and aggregating only $B_k$, the temporal tokenizers, and classification heads via FedAvg ($\bar{B} = \sum \frac{n_k}{N} B_k$), preserving exact linear aggregation. This synergizes with subspace-oriented adapter reparameterization paradigms~\cite{sajjadi2026solar}, where freezing structured basis representations enables extreme communication efficiency across decentralized nodes.
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=\columnwidth]{fig/python_federated_convergence.png}
+\includegraphics[width=0.88\textwidth]{fig/python_federated_convergence.png}
 \caption{Multi-center federated scaling across 50 hospital nodes: (a) global test AUROC convergence, and (b) cumulative network transmission overhead.}
 \label{fig:federated_convergence}
-\end{figure}
+\end{figure*}
 
 \begin{table}[t]
 \centering
