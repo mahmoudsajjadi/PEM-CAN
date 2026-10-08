@@ -9,9 +9,8 @@
 
 Official PyTorch implementation and reproduction package for the manuscript:  
 **"PEM-CAN: Parameter-Efficient Multimodal Fusion for Diabetic Neuropathy Screening"**  
-*Seyed Mahmoud Sajjadi Mohammadabadi*<sup>1,2</sup>  
-<sup>1</sup>Battle Born AI, Nevada Center for Applied Research, University of Nevada, Reno, NV 89557, USA  
-<sup>2</sup>Department of Computer Science and Engineering, University of Nevada, Reno, NV 89557, USA  
+*Seyed Mahmoud Sajjadi Mohammadabadi*  
+Department of Computer Science and Engineering, University of Nevada, Reno, NV 89557, USA  
 [ORCID: 0009-0001-9629-9734](https://orcid.org/0009-0001-9629-9734)
 
 ---
